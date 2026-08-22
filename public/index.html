@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Physarum</title>
+  <meta name="description" content="A simulated slime mould grows toward token opportunities and prunes away from bad ones. We gave a brainless organism access to the market." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="dish" aria-label="Live slime mould simulation">
+      <div class="dish-frame">
+        <canvas id="trail" width="256" height="256"></canvas>
+        <canvas id="overlay" width="768" height="768"></canvas>
+        <div class="dish-caption" id="caption">connecting</div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <header class="panel-head">
+        <div class="eyebrow">Physarum polycephalum, simulated</div>
+        <h1>We gave a brainless organism access to the market.</h1>
+        <p class="lede">
+          Every token is a food source. The slime senses chemical gradients, grows toward
+          the richest food, and starves on the way to anything toxic. Nobody is steering it.
+        </p>
+      </header>
+
+      <section class="stats" aria-label="Organism status">
+        <div class="stat"><span class="stat-label">Body</span><span class="stat-value" id="s-alive">0</span></div>
+        <div class="stat"><span class="stat-label">Step</span><span class="stat-value" id="s-step">0</span></div>
+        <div class="stat"><span class="stat-label">Births / s</span><span class="stat-value" id="s-births">0</span></div>
+        <div class="stat"><span class="stat-label">Deaths / s</span><span class="stat-value" id="s-deaths">0</span></div>
+      </section>
+
+      <section class="card" aria-label="Paper portfolio">
+        <div class="card-head">
+          <span class="card-title">Paper portfolio</span>
+          <span class="muted" id="p-source">mock market</span>
+        </div>
+        <div class="hero">
+          <span class="hero-value" id="p-value">$10,000</span>
+          <span class="hero-delta" id="p-return">0.00%</span>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><i class="swatch swatch-organism"></i>organism</span>
+          <span class="legend-item"><i class="swatch swatch-bench"></i>equal weight <span id="p-bench" class="muted">0.00%</span></span>
+        </div>
+        <div class="spark-wrap">
+          <canvas id="spark" width="320" height="72"></canvas>
+          <div class="spark-tip" id="spark-tip" hidden></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Allocation by token">
+        <div class="card-head">
+          <span class="card-title">Where the body is</span>
+          <span class="muted">cash <span id="a-cash">100%</span></span>
+        </div>
+        <table class="alloc">
+          <thead>
+            <tr><th>Token</th><th>Score</th><th class="num">Share</th><th class="num">1h</th></tr>
+          </thead>
+          <tbody id="alloc-body"></tbody>
+        </table>
+      </section>
+
+      <section class="controls" aria-label="Controls">
+        <button id="btn-pause" class="btn">Pause</button>
+        <button id="btn-reset" class="btn btn-ghost">Reset dish</button>
+        <label class="ctl">Speed
+          <select id="sel-speed">
+            <option value="10">10 steps/s</option>
+            <option value="30" selected>30 steps/s</option>
+            <option value="60">60 steps/s</option>
+            <option value="120">120 steps/s</option>
+          </select>
+        </label>
+        <label class="ctl check"><input type="checkbox" id="chk-agents" /> Show particles</label>
+      </section>
+
+      <details class="rules">
+        <summary>The rules it follows</summary>
+        <ol>
+          <li>Each particle senses the trail at three points ahead of it and turns toward the strongest reading.</li>
+          <li>A hungry particle also smells food, whose scent is the token's score, and settles on it to eat. A fed one ignores scent and wanders along trails.</li>
+          <li>It moves one cell and lays trail where it lands. Trail diffuses and evaporates every step. Full cells block the way.</li>
+          <li>Food in a cell is shared, so a node can only carry so much body. Weak food refills particles slowly.</li>
+          <li>Enough energy and it divides into a free neighbouring cell. No energy and it dies.</li>
+          <li>Toxic food (negative score) has no scent and drains energy. Branches toward it starve and the trail evaporates.</li>
+        </ol>
+        <p class="muted">Body-time on each token is the portfolio weight. Paper only.</p>
+      </details>
+    </aside>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
