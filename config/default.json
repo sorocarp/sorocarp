@@ -1,0 +1,64 @@
+{
+  "sim": {
+    "width": 256,
+    "height": 256,
+    "sensorAngle": 0.7854,
+    "rotationAngle": 0.7854,
+    "sensorOffset": 9,
+    "stepSize": 1,
+    "jitter": 0.25,
+    "depositAmount": 5,
+    "decay": 0.08,
+    "diffusion": 0.8,
+    "initialAgents": 3000,
+    "maxAgents": 20000,
+    "minAgents": 500,
+    "spawnRadius": 22,
+    "metabolism": 0.0025,
+    "feedRate": 0.05,
+    "toxinRate": 0.03,
+    "divideEnergy": 2,
+    "maxEnergy": 3,
+    "scentPeak": 40,
+    "foodRadius": 9,
+    "attractReach": 7,
+    "nucleusRadius": 14,
+    "nucleusAttract": 0.25,
+    "nucleusReach": 2,
+    "maxPerCell": 3,
+    "stickiness": 0.5,
+    "catchmentReach": 3,
+    "hungerThreshold": 0.8
+  },
+  "market": {
+    "source": "mock",
+    "refreshMs": 1000,
+    "seed": 1337,
+    "solana": {
+      "refreshMs": 15000,
+      "tokens": [
+        "So11111111111111111111111111111111111111112",
+        "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+        "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+        "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+        "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+        "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3",
+        "jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL",
+        "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE"
+      ]
+    }
+  },
+  "engine": {
+    "stepsPerSecond": 30,
+    "frameRate": 20,
+    "allocationEverySteps": 10,
+    "scoreSmoothing": 0.2
+  },
+  "portfolio": {
+    "startingCapitalUsd": 10000
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 4242
+  }
+}
