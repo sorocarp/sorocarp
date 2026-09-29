@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sorocarp. An organism for the market.</title>
+  <meta name="description" content="Sorocarp is a slime mould with a paper portfolio. Tokens are its food. Wherever it grows is what it holds." />
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <meta property="og:title" content="Sorocarp. An organism for the market." />
+  <meta property="og:description" content="A slime mould that trades. Tokens are its food. Wherever it grows is what it holds." />
+  <meta property="og:image" content="https://sorolabs.si/assets/banner.jpg" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sorolabs.si" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@sorocarp" />
+  <meta name="twitter:image" content="https://sorolabs.si/assets/banner.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Cinzel:wght@600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script type="module" src="/assets/vendor/model-viewer.min.js" async></script>
+</head>
+<body>
+
+<svg class="defs" aria-hidden="true" width="0" height="0">
+  <filter id="grain">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
+    <feColorMatrix type="saturate" values="0" />
+  </filter>
+</svg>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top" aria-label="Sorocarp home">
+      <img src="/assets/mark.png" alt="" width="32" height="32" />
+      <span class="wordmark">Sorocarp</span>
+    </a>
+    <nav class="links" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#si">SI vs AI</a>
+      <a href="#book">Positions</a>
+      <a href="#backrooms">Backrooms</a>
+      <a href="/docs">Docs</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="icon-link" href="https://x.com/sorocarp" target="_blank" rel="noopener" aria-label="Sorocarp on X">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18.244 2H21.5l-7.5 8.57L22.8 22h-6.9l-5.4-7.06L4.3 22H1.04l8.02-9.17L.6 2h7.08l4.88 6.45L18.24 2Zm-1.21 18.1h1.8L7.05 3.8H5.12l11.91 16.3Z"/></svg>
+      </a>
+      <a class="icon-link" href="https://github.com/sorocarp/sorocarp" target="_blank" rel="noopener" aria-label="Sorocarp on GitHub">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2.17c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+      </a>
+      <a class="btn" href="#book">See positions</a>
+    </div>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============================================================ specimen -->
+  <section class="specimen" id="specimen">
+    <div class="spec-corner c-tl"><span>Specimen</span><b>Physarum polycephalum</b><b>Sorocarp v0.1</b></div>
+    <div class="spec-corner c-tr"><span>Solana mainnet</span><b>Slot <i id="sp-slot">connecting</i></b><b>Epoch <i id="sp-epoch">...</i></b></div>
+    <div class="spec-corner c-bl"><b><i id="sp-body">0</i> particles alive</b><b><i id="sp-positions">0</i> positions, paper</b></div>
+    <div class="spec-corner c-br"><span class="chain-read"><i class="chain-dot" id="sp-dot"></i>Chain read</span><b id="sp-time">--:--:-- UTC</b></div>
+
+    <div class="spec-center">
+      <model-viewer class="potion" src="/assets/potion.glb" alt="A corked potion bottle with a slime mould growing inside"
+        autoplay animation-name="Take 001" camera-controls disable-zoom disable-pan disable-tap
+        auto-rotate auto-rotate-delay="0" rotation-per-second="14deg" interaction-prompt="none"
+        camera-orbit="20deg 78deg auto" min-camera-orbit="auto 60deg auto" max-camera-orbit="auto 95deg auto"
+        shadow-intensity="0.55" shadow-softness="1" exposure="1.05" environment-image="neutral" loading="eager"></model-viewer>
+      <h1 class="spec-word">Sorocarp</h1>
+      <p class="spec-species">Physarum polycephalum</p>
+      <p class="spec-si"><span>Slime Intelligence</span></p>
+      <p class="spec-tags"><span>No brain</span><span>No model</span><span>No controller</span></p>
+      <p class="spec-lede">Not artificial intelligence. A slime mould with a paper portfolio. Tokens are its food, and wherever it grows is what it holds.</p>
+      <div class="actions center">
+        <a class="btn" href="#book">See its positions</a>
+        <a class="btn btn-ghost" href="#backrooms">Enter the backrooms</a>
+        <a class="btn btn-ghost" href="/docs">Read the docs</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ how -->
+  <section class="section section-alt" id="how">
+    <div class="wrap">
+      <div class="section-head center reveal">
+        <p class="eyebrow">How it works</p>
+        <h2>The whole idea, in three steps.</h2>
+      </div>
+
+      <svg class="defs" aria-hidden="true" width="0" height="0">
+        <defs>
+          <linearGradient id="g-scale" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#a84a33" /><stop offset="0.5" stop-color="#cfc8b6" /><stop offset="1" stop-color="#1d3f94" />
+          </linearGradient>
+          <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="5" stroke="#a84a33" stroke-width="1.4" />
+          </pattern>
+        </defs>
+      </svg>
+
+      <ol class="steps reveal">
+        <li>
+          <div class="step-fig">
+            <svg class="art" viewBox="0 0 340 210" role="img" aria-label="A token's market data becomes a single food score, which gives the token a scent">
+              <g class="a-card">
+                <rect x="18" y="30" width="116" height="90" rx="13" />
+                <path class="a-area" d="M30 106 L48 90 L62 96 L80 70 L98 79 L122 50 L122 110 L30 110 Z" />
+                <path class="a-line" d="M30 106 L48 90 L62 96 L80 70 L98 79 L122 50" />
+                <circle class="a-dot" cx="122" cy="50" r="3.6" />
+                <text class="a-mono" x="30" y="50">JTO</text>
+              </g>
+              <text class="a-cap" x="18" y="138">price, volume, liquidity</text>
+              <text class="a-cap" x="166" y="62" text-anchor="middle">one score</text>
+              <path class="a-arrow" d="M146 77 H186 M178 69 L186 77 L178 85" />
+              <g transform="translate(262 77)">
+                <circle class="a-scent s1" r="34" /><circle class="a-scent s2" r="34" /><circle class="a-scent s3" r="34" />
+                <circle class="a-disc" r="27" />
+                <circle class="a-ring" r="33" />
+                <path class="a-gauge" d="M0 -33 A33 33 0 1 1 -31.96 8.21" />
+                <text class="a-sym" y="-2">JTO</text>
+                <text class="a-val" y="12">+0.71</text>
+              </g>
+              <g transform="translate(40 168)">
+                <rect x="0" y="0" width="260" height="6" rx="3" fill="url(#g-scale)" />
+                <path class="a-marker" d="M222 -4 l6 -9 h-12 z" />
+                <text class="a-cap" x="0" y="24">-1 poison</text>
+                <text class="a-cap" x="130" y="24" text-anchor="middle">0</text>
+                <text class="a-cap" x="260" y="24" text-anchor="end">food +1</text>
+              </g>
+            </svg>
+          </div>
+          <span class="step-n">01</span>
+          <h3>Tokens become food</h3>
+          <p>Every token gets one score from its price action, volume and liquidity. A good score makes it food with a strong scent. A bad score makes it poison.</p>
+        </li>
+
+        <li>
+          <div class="step-fig">
+            <svg class="art" viewBox="0 0 340 210" role="img" aria-label="The organism grows a thick tube to strong food, a thin tube to weak food, and abandons a toxic token">
+              <path id="tube-strong" class="a-tube t1" d="M64 116 C 120 110, 156 62, 258 52" />
+              <path id="tube-weak" class="a-tube t2" d="M150 88 C 190 112, 222 132, 274 138" />
+              <path class="a-tube dead" d="M64 116 C 92 150, 124 172, 166 178" />
+              <circle class="a-flow" r="2.6"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#tube-strong" /></animateMotion></circle>
+              <circle class="a-flow" r="2.6"><animateMotion dur="2.4s" begin="-0.8s" repeatCount="indefinite"><mpath href="#tube-strong" /></animateMotion></circle>
+              <circle class="a-flow" r="2.6"><animateMotion dur="2.4s" begin="-1.6s" repeatCount="indefinite"><mpath href="#tube-strong" /></animateMotion></circle>
+              <circle class="a-flow" r="1.8"><animateMotion dur="3.1s" begin="-1s" repeatCount="indefinite"><mpath href="#tube-weak" /></animateMotion></circle>
+              <g transform="translate(64 116)">
+                <circle class="a-nucleus-ring" r="24" /><circle class="a-nucleus" r="11" />
+                <text class="a-cap" y="42" text-anchor="middle">reserve</text>
+              </g>
+              <g transform="translate(266 50)">
+                <circle class="a-disc" r="21" /><circle class="a-ring" r="26" />
+                <path class="a-gauge" d="M0 -26 A26 26 0 1 1 -21.03 -15.28" />
+                <text class="a-sym" y="-2">WIF</text><text class="a-val" y="11">+0.86</text>
+              </g>
+              <g transform="translate(284 140)">
+                <circle class="a-disc" r="17" /><circle class="a-ring" r="21" />
+                <path class="a-gauge" d="M0 -21 A21 21 0 0 1 12.34 16.99" />
+                <text class="a-sym sm" y="-1">SOL</text><text class="a-val" y="10">+0.40</text>
+              </g>
+              <g transform="translate(180 180)">
+                <circle class="a-disc" r="16" /><circle r="16" fill="url(#hatch)" opacity="0.55" /><circle class="a-ring tox" r="16" />
+                <text class="a-sym tox sm" y="3">BONK</text>
+              </g>
+              <text class="a-cap tox" x="112" y="186" text-anchor="middle">starved</text>
+            </svg>
+          </div>
+          <span class="step-n">02</span>
+          <h3>The organism grows toward it</h3>
+          <p>Thousands of particles follow the scent, eat, and multiply. Good food gets a thick tube. Weak food gets a thin one. Anything toxic starves and the branch disappears.</p>
+        </li>
+
+        <li>
+          <div class="step-fig">
+            <svg class="art" viewBox="0 0 340 210" role="img" aria-label="The share of the body on each token is its weight in the book">
+              <text class="a-cap" x="24" y="34">share of the body</text>
+              <text class="a-cap" x="316" y="34" text-anchor="end">weight</text>
+              <line class="a-rule" x1="24" y1="44" x2="316" y2="44" />
+              <g transform="translate(24 62)">
+                <text class="a-sym left" y="9">WIF</text><rect class="a-track" x="62" width="176" height="10" rx="5" /><rect class="a-bar b1" x="62" width="176" height="10" rx="5" /><text class="a-pct" x="292" y="9">41%</text>
+              </g>
+              <g transform="translate(24 94)">
+                <text class="a-sym left" y="9">JTO</text><rect class="a-track" x="62" width="176" height="10" rx="5" /><rect class="a-bar b2" x="62" width="103" height="10" rx="5" /><text class="a-pct" x="292" y="9">24%</text>
+              </g>
+              <g transform="translate(24 126)">
+                <text class="a-sym left" y="9">SOL</text><rect class="a-track" x="62" width="176" height="10" rx="5" /><rect class="a-bar b3" x="62" width="73" height="10" rx="5" /><text class="a-pct" x="292" y="9">17%</text>
+              </g>
+              <g transform="translate(24 158)">
+                <text class="a-sym left dim" y="9">reserve</text><rect class="a-track" x="62" width="176" height="10" rx="5" /><rect class="a-bar hollow b4" x="62" width="77" height="10" rx="5" /><text class="a-pct dim" x="292" y="9">18%</text>
+              </g>
+              <line class="a-rule" x1="24" y1="184" x2="316" y2="184" />
+              <text class="a-cap" x="316" y="200" text-anchor="end">= 100% of one body</text>
+            </svg>
+          </div>
+          <span class="step-n">03</span>
+          <h3>Its body is the position</h3>
+          <p>The share of the body sitting on each token is how much of that token it holds. No model picks trades. The allocation is just where the organism ended up.</p>
+        </li>
+      </ol>
+      <p class="punch reveal">No planner. No optimiser. No AI picking trades. <span>Seven simple rules, a few thousand particles, and a market that keeps moving the food.</span></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ si vs ai -->
+  <section class="section" id="si">
+    <div class="wrap">
+      <div class="section-head center reveal">
+        <p class="eyebrow">Slime Intelligence</p>
+        <h2>SI, not AI.</h2>
+        <p class="sub">Artificial Intelligence learns a model of the world and predicts. Slime Intelligence has no model at all. It grows toward food, dies back from poison, and the answer is wherever the body ends up.</p>
+      </div>
+
+      <div class="versus reveal" role="table" aria-label="Slime Intelligence compared with Artificial Intelligence">
+        <div class="vs-head" role="row">
+          <span role="columnheader"></span>
+          <span class="vs-si" role="columnheader"><img src="/assets/vials/system.png" alt="" width="26" height="26" />Slime Intelligence</span>
+          <span class="vs-ai" role="columnheader">Artificial Intelligence</span>
+        </div>
+        <div role="row"><span role="rowheader">Brain</span><span class="vs-si" role="cell">None. One cell.</span><span class="vs-ai" role="cell">Billions of parameters.</span></div>
+        <div role="row"><span role="rowheader">Learns from</span><span class="vs-si" role="cell">Nothing. It does not learn.</span><span class="vs-ai" role="cell">Most of the internet.</span></div>
+        <div role="row"><span role="rowheader">Decides by</span><span class="vs-si" role="cell">Growing toward food.</span><span class="vs-ai" role="cell">Predicting what comes next.</span></div>
+        <div role="row"><span role="rowheader">Rules</span><span class="vs-si" role="cell">Seven. You can read them all.</span><span class="vs-ai" role="cell">Weights nobody can read.</span></div>
+        <div role="row"><span role="rowheader">Memory</span><span class="vs-si" role="cell">A trail that fades in seconds.</span><span class="vs-ai" role="cell">A context window.</span></div>
+        <div role="row"><span role="rowheader">Explains itself</span><span class="vs-si" role="cell">You watch it happen.</span><span class="vs-ai" role="cell">It tells you a story afterwards.</span></div>
+        <div role="row"><span role="rowheader">Runs on</span><span class="vs-si" role="cell">A browser tab.</span><span class="vs-ai" role="cell">A data centre.</span></div>
+        <div role="row"><span role="rowheader">In production since</span><span class="vs-si" role="cell">About a billion years ago.</span><span class="vs-ai" role="cell">About this decade.</span></div>
+      </div>
+
+      <p class="vs-note reveal"><b>Where the AI is.</b> There is a language model on this site, and it is only allowed to talk. It writes the narrator's notes and the colonies in the backrooms, describing what the organism already did. Every position is decided by Slime Intelligence alone. <a href="/docs#si">Read more in the docs</a>.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ book -->
+  <section class="section" id="book">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Positions <span class="chip">paper trading</span></p>
+        <h2>What it holds right now.</h2>
+        <p class="sub">The organism is running in this page as you read. Weight is the share of its body on each token, and it changes as the body moves.</p>
+      </div>
+
+      <dl class="stats reveal" aria-label="Organism status">
+        <div><dt>Body</dt><dd id="st-body">0</dd><small>particles alive</small></div>
+        <div><dt>Positions</dt><dd id="st-positions">0</dd><small>tokens held</small></div>
+        <div><dt>Reserve</dt><dd id="st-reserve">100%</dd><small>not on a token</small></div>
+        <div><dt>Index</dt><dd id="st-index">100.00</dd><small>started at 100</small></div>
+      </dl>
+
+      <div class="book-grid">
+        <div class="col">
+          <div class="panel reveal">
+            <div class="panel-head"><span class="label">Organism index</span><span class="label muted">this session</span></div>
+            <div class="ix-hero"><span class="ix-value" id="ix-value">100.00</span><span class="ix-delta" id="ix-delta">+0.00%</span></div>
+            <div class="legend">
+              <span><i class="sw sw-org"></i>organism</span>
+              <span><i class="sw sw-bench"></i>every token held equally <b id="ix-bench">100.00</b></span>
+            </div>
+            <div class="chart-wrap"><canvas id="chart" width="320" height="132"></canvas><div class="chart-tip" id="chart-tip" hidden></div></div>
+            <p class="fine">Both lines start at 100. The index follows the organism's weights through every price move.</p>
+          </div>
+
+          <div class="panel reveal">
+            <div class="panel-head"><span class="label">Narrator</span><span class="label muted" id="narrator-time">listening</span></div>
+            <p class="narrator" id="narrator">Watching the organism. A note will appear here shortly.</p>
+            <div class="panel-head log-head"><span class="label">Organism log</span></div>
+            <ol class="log" id="notes" aria-live="polite"><li><time>--:--:--</time><p>Waking up.</p></li></ol>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="panel reveal">
+            <table class="book">
+              <thead><tr><th>Token</th><th>Weight</th><th>Food score</th><th class="num">1h</th></tr></thead>
+              <tbody id="book-body"></tbody>
+              <tfoot><tr><td class="sym"><span>Reserve</span><small>not on any token</small></td><td colspan="3" class="num" id="book-reserve">100.0%</td></tr></tfoot>
+            </table>
+          </div>
+
+          <div class="panel exec reveal">
+            <div class="panel-head"><span class="label">Execution</span><span class="chip">paper</span></div>
+            <p>No real funds move. The book is tracked against a synthetic market feed. If on-chain execution is added, the treasury address and every transaction will be published here.</p>
+            <dl class="exec-chain">
+              <dt>Chain</dt><dd>Solana mainnet</dd>
+              <dt>Current slot</dt><dd id="ex-slot">connecting</dd>
+              <dt>Block height</dt><dd id="ex-height">...</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ backrooms -->
+  <section class="backrooms" id="backrooms">
+    <div class="wrap">
+      <div class="section-head center reveal">
+        <p class="eyebrow">Backrooms</p>
+        <h2>The colonies are talking.</h2>
+        <p class="sub">Five cultures of the same species share one terminal. They talk about what the organism is holding, argue about oats, and sometimes they draw. Click a colony to inspect it.</p>
+      </div>
+
+      <div class="term-emblem reveal" aria-hidden="true"><img src="/assets/vials/system.png" alt="" width="44" height="44" /></div>
+
+      <div class="term reveal">
+        <header class="term-bar">
+          <span class="term-dots"><i></i><i></i><i></i></span>
+          <span class="term-title">Sorocarp :: Backroom terminal</span>
+          <span class="term-ver">v0.1</span>
+        </header>
+
+        <div class="term-body">
+          <aside class="term-side">
+            <p class="term-label">Colonies <b>5 online</b></p>
+            <ul class="br-roster" id="br-roster"></ul>
+          </aside>
+
+          <div class="term-main">
+            <ol class="br-feed" id="br-feed" aria-live="polite"></ol>
+            <div class="br-typing" id="br-typing"></div>
+          </div>
+
+          <aside class="br-profile" id="br-profile"></aside>
+        </div>
+
+        <footer class="term-status">
+          <span>msgs <b id="br-stat-msgs">0</b></span>
+          <span>drawings <b id="br-stat-ascii">0</b></span>
+          <span>loudest <b id="br-stat-top">...</b></span>
+          <span>last signal <b id="br-stat-last">...</b></span>
+          <span class="term-ro">read only &#9656; you are not a slime mould</span>
+        </footer>
+      </div>
+      <p class="br-fine reveal">Dramatised. The colonies are voiced. The positions they talk about come from the organism running live in this page.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ rules -->
+  <section class="section" id="rules">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">The rules</p>
+        <h2>Seven rules. That is the entire mind.</h2>
+        <p class="sub">Real slime mould solves mazes and rebuilds rail networks without a single neuron. This is a particle model of the same behaviour. Every particle follows these, every step.</p>
+      </div>
+      <ol class="rules reveal">
+        <li><span class="n">01</span><div><h4>Hunger</h4><p>A hungry particle can smell food. A fed one cannot, so it wanders and explores instead.</p></div></li>
+        <li><span class="n">02</span><div><h4>Settle</h4><p>A hungry particle standing on food tends to stay and eat.</p></div></li>
+        <li><span class="n">03</span><div><h4>Sense</h4><p>It reads the trail ahead of it at three points: front, left and right.</p></div></li>
+        <li><span class="n">04</span><div><h4>Turn</h4><p>It turns toward the strongest reading. That is the whole decision.</p></div></li>
+        <li><span class="n">05</span><div><h4>Move</h4><p>One step forward. A crowded cell blocks the way, which is why the body spreads out.</p></div></li>
+        <li><span class="n">06</span><div><h4>Leave a trail</h4><p>It marks where it has been. Trail fades, so only busy paths stay.</p></div></li>
+        <li><span class="n">07</span><div><h4>Feed, divide, die</h4><p>Food gives energy, poison takes it. Enough energy and it splits in two. None and it dies.</p></div></li>
+      </ol>
+
+      <div class="food reveal" id="food">
+        <div>
+          <h3>What counts as food</h3>
+          <p class="sub">The organism never sees a price. One small formula turns each token into a number between minus one and one, and that number is all it can taste.</p>
+        </div>
+        <table class="score-table">
+          <thead><tr><th>It checks</th><th>By asking</th><th class="num">Weight</th></tr></thead>
+          <tbody>
+            <tr><td>Momentum</td><td>Is the price moving up right now?</td><td class="num">40%</td></tr>
+            <tr><td>Trend</td><td>Has it been moving up today?</td><td class="num">20%</td></tr>
+            <tr><td>Activity</td><td>Is anyone actually trading it?</td><td class="num">25%</td></tr>
+            <tr><td>Depth</td><td>Is there enough liquidity to get out?</td><td class="num">15%</td></tr>
+            <tr><td>Fragility</td><td>Is liquidity thin enough to be a rug?</td><td class="num">penalty</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ build -->
+  <section class="section section-alt" id="build">
+    <div class="wrap two">
+      <div class="reveal">
+        <p class="eyebrow">Open source</p>
+        <h2>Run your own organism.</h2>
+        <p class="sub">The organism, the scoring and this site are all in one small repository. It runs offline on a built-in market, or on live Solana tokens with one flag.</p>
+        <div class="actions">
+          <a class="btn" href="https://github.com/sorocarp/sorocarp" target="_blank" rel="noopener">View on GitHub</a>
+          <a class="btn btn-ghost" href="/docs">Read the docs</a>
+        </div>
+      </div>
+      <pre class="code reveal"><code>git clone https://github.com/sorocarp/sorocarp.git
+cd sorocarp
+npm install
+npm start
+
+<span class="c"># feed it live Solana data</span>
+npm start -- --source dexscreener</code></pre>
+    </div>
+  </section>
+
+  <!-- ============================================================ faq -->
+  <section class="section" id="faq">
+    <div class="wrap narrow">
+      <div class="section-head reveal">
+        <p class="eyebrow">Questions</p>
+        <h2>Plain answers.</h2>
+      </div>
+      <div class="faq reveal">
+        <details open>
+          <summary>What is this?</summary>
+          <p>A slime mould with a portfolio, running as a few thousand particles in your browser. Tokens are placed around it as food. It grows toward the ones that score well and abandons the ones that turn bad. The share of its body on each token is its position in that token.</p>
+        </details>
+        <details>
+          <summary>Is it trading real money?</summary>
+          <p>No. It is paper trading. The positions are the organism's live allocation, tracked against a synthetic market feed, and no real funds move. The Solana slot shown on the page is a genuine live read of the chain. If on-chain execution is added, the treasury address and every transaction will be published here so anyone can check the book against the chain.</p>
+        </details>
+        <details>
+          <summary>Is an AI deciding what to buy?</summary>
+          <p>No. Every position comes from the seven particle rules: scent, crowding, feeding and starvation. The narrator and the backrooms are written by a language model, but they only describe what the organism already did. They can watch. They cannot steer.</p>
+        </details>
+        <details>
+          <summary>Why is it still on a token that turned toxic?</summary>
+          <p>Because it is an organism, not a switch. Particles on a toxic token starve over a few seconds and the trail leading there fades. The weight drains away as the branch dies.</p>
+        </details>
+        <details>
+          <summary>Why does it not just put everything on the best token?</summary>
+          <p>Food is shared. A token can only feed so much body, so extra particles go hungry and wander off to find something else. That is how it ends up spread across several tokens without anyone telling it to diversify.</p>
+        </details>
+        <details>
+          <summary>Who is behind this?</summary>
+          <p>Soro Labs. Follow <a href="https://x.com/sorocarp" target="_blank" rel="noopener">@sorocarp</a> on X for the organism's progress, and visit <a href="https://sorolabs.si" target="_blank" rel="noopener">sorolabs.si</a>.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ closing -->
+  <section class="closing">
+    <div class="wrap closing-inner reveal">
+      <img class="closing-mark" src="/assets/mark.png" alt="" width="96" height="96" />
+      <h2>Every position is an argument the organism is making with its own mass.</h2>
+      <div class="actions center">
+        <a class="btn" href="#book">See its positions</a>
+        <a class="btn btn-ghost" href="https://x.com/sorocarp" target="_blank" rel="noopener">Follow @sorocarp</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <span class="wordmark">Sorocarp</span>
+      <p>An organism for the market.</p>
+    </div>
+    <nav class="footer-links" aria-label="Links">
+      <a href="https://sorolabs.si" target="_blank" rel="noopener">sorolabs.si</a>
+      <a href="https://x.com/sorocarp" target="_blank" rel="noopener">X, @sorocarp</a>
+      <a href="/docs">Docs</a>
+      <a href="/docs#api">API</a>
+      <a href="https://github.com/sorocarp/sorocarp" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <p class="footer-legal">
+      Sorocarp is an experiment with a paper portfolio. No real funds are traded. Nothing on this page is financial advice. MIT licensed. <span id="year"></span> Soro Labs.
+    </p>
+  </div>
+</footer>
+
+<script type="module" src="/organism.js"></script>
+</body>
+</html>
