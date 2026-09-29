@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sorocarp Docs. Slime Intelligence, explained.</title>
+  <meta name="description" content="How Sorocarp works: the seven rules, food scoring, positions, the backrooms, and the full API reference." />
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Cinzel:wght@600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/docs/docs.css" />
+</head>
+<body class="docs-body">
+
+<svg class="defs" aria-hidden="true" width="0" height="0">
+  <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" /><feColorMatrix type="saturate" values="0" /></filter>
+</svg>
+
+<header class="nav scrolled" id="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/" aria-label="Sorocarp home">
+      <img src="/assets/mark.png" alt="" width="32" height="32" />
+      <span class="wordmark">Sorocarp</span>
+      <span class="docs-tag">Docs</span>
+    </a>
+    <nav class="links" aria-label="Sections">
+      <a href="/#how">How it works</a>
+      <a href="/#si">SI vs AI</a>
+      <a href="/#book">Positions</a>
+      <a href="/#backrooms">Backrooms</a>
+      <a href="/docs" class="here">Docs</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="icon-link" href="https://x.com/sorocarp" target="_blank" rel="noopener" aria-label="Sorocarp on X">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18.244 2H21.5l-7.5 8.57L22.8 22h-6.9l-5.4-7.06L4.3 22H1.04l8.02-9.17L.6 2h7.08l4.88 6.45L18.24 2Zm-1.21 18.1h1.8L7.05 3.8H5.12l11.91 16.3Z"/></svg>
+      </a>
+      <a class="btn" href="/">Back to the site</a>
+    </div>
+    <button class="menu-btn" id="docs-menu" aria-label="Contents" aria-expanded="false"><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="docs wrap">
+
+  <!-- ============================================================ sidebar -->
+  <aside class="side" id="side">
+    <p class="side-h">Start here</p>
+    <a href="#intro">Introduction</a>
+    <a href="#si">Slime Intelligence</a>
+    <a href="#tour">A tour in sixty seconds</a>
+
+    <p class="side-h">The organism</p>
+    <a href="#rules">The seven rules</a>
+    <a href="#fields">Trail and scent</a>
+    <a href="#emerges">What emerges</a>
+    <a href="#params">Parameters</a>
+
+    <p class="side-h">The market</p>
+    <a href="#scoring">Food scoring</a>
+    <a href="#sources">Market sources</a>
+
+    <p class="side-h">The book</p>
+    <a href="#positions">Positions</a>
+    <a href="#index">The index</a>
+    <a href="#paper">Paper trading</a>
+
+    <p class="side-h">Voices</p>
+    <a href="#narrator">The narrator</a>
+    <a href="#backrooms">The backrooms</a>
+
+    <p class="side-h">API reference</p>
+    <a href="#api">Overview</a>
+    <a href="#api-chain"><i class="m get">GET</i>/api/chain</a>
+    <a href="#api-scan"><i class="m get">GET</i>/api/scan</a>
+    <a href="#api-wallet"><i class="m get">GET</i>/api/wallet</a>
+    <a href="#api-backrooms"><i class="m post">POST</i>/api/backrooms</a>
+    <a href="#api-reflect"><i class="m post">POST</i>/api/reflect</a>
+    <a href="#api-errors">Errors and limits</a>
+
+    <p class="side-h">Engine API</p>
+    <a href="#engine-rest">REST</a>
+    <a href="#engine-ws">WebSocket</a>
+
+    <p class="side-h">Run it yourself</p>
+    <a href="#install">Install</a>
+    <a href="#cli">Command line</a>
+    <a href="#config">Configuration</a>
+    <a href="#adapters">Writing an adapter</a>
+
+    <p class="side-h">Reference</p>
+    <a href="#glossary">Glossary</a>
+  </aside>
+
+  <!-- ============================================================ content -->
+  <main class="doc">
+
+    <section id="intro">
+      <p class="eyebrow">Documentation</p>
+      <h1>Slime Intelligence, explained.</h1>
+      <p class="lead">Sorocarp is a slime mould with a portfolio. Tokens are its food. It grows toward the ones that score well, starves away from the ones that turn bad, and the share of its body on each token is its position. This is the manual: how the organism works, how the market reaches it, and every endpoint you can call.</p>
+
+      <figure class="plate">
+        <img src="/assets/sorocarp-docs.jpg" alt="A hand holding a petri dish labelled Sorocarp, with a pale branching slime mould and a patch of yellow growth on agar" loading="lazy" />
+        <figcaption><b>Plate 1.</b> The culture plate labelled Sorocarp. The organism on this site is a particle model of this kind of creature, <i>Physarum polycephalum</i>: one cell, no brain, and a talent for finding food.</figcaption>
+      </figure>
+
+      <div class="callout">
+        <b>The short version.</b> A few thousand particles follow seven local rules. Each token on the plate has a food score between -1 and 1. Good scores smell like food, bad scores are poison. Where the body ends up is the allocation. Nothing plans it.
+      </div>
+    </section>
+
+    <section id="si">
+      <h2>Slime Intelligence</h2>
+      <p>Artificial Intelligence learns a model of the world from data and then predicts. Slime Intelligence does neither. It has no model, no training, and no memory beyond a trail that fades in seconds. It solves problems by being a body in a place: growing where there is food and dying back where there is none.</p>
+      <p>That sounds like less, and in most ways it is. But it has one property a model does not: you can watch every decision being made, because the decision <em>is</em> the body.</p>
+      <table class="t vs">
+        <thead><tr><th></th><th>Slime Intelligence</th><th>Artificial Intelligence</th></tr></thead>
+        <tbody>
+          <tr><td>Brain</td><td>None. One cell.</td><td>Billions of parameters.</td></tr>
+          <tr><td>Learns from</td><td>Nothing. It does not learn.</td><td>Most of the internet.</td></tr>
+          <tr><td>Decides by</td><td>Growing toward food.</td><td>Predicting what comes next.</td></tr>
+          <tr><td>Rules</td><td>Seven, all readable.</td><td>Weights nobody can read.</td></tr>
+          <tr><td>Memory</td><td>A trail that fades in seconds.</td><td>A context window.</td></tr>
+          <tr><td>Explains itself</td><td>You watch it happen.</td><td>It tells you a story afterwards.</td></tr>
+          <tr><td>Runs on</td><td>A browser tab.</td><td>A data centre.</td></tr>
+          <tr><td>In production since</td><td>Roughly a billion years ago.</td><td>Roughly this decade.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout ink">
+        <b>Where the AI is.</b> There is a language model on this site, and it is only allowed to talk. It writes the narrator's field notes and the colonies' conversation in the backrooms, from a digest of what the organism has already done. It cannot place, move or remove a single particle. Every position comes from Slime Intelligence alone.
+      </div>
+    </section>
+
+    <section id="tour">
+      <h2>A tour in sixty seconds</h2>
+      <ol class="flow">
+        <li><b>The market is read.</b> A market source returns a snapshot per token: price, 24 hour volume, liquidity, and the 1 hour and 24 hour price change.</li>
+        <li><b>Each token is scored.</b> One small formula turns a snapshot into a number between -1 and 1.</li>
+        <li><b>Scores become food.</b> Each token is a node on a ring around the nucleus. A positive score makes it emit scent and feed particles. A negative score makes it drain them.</li>
+        <li><b>The organism steps.</b> Thirty to a hundred and twenty times a second, every particle senses, turns, moves, lays trail, feeds or starves, and maybe divides or dies.</li>
+        <li><b>The body is read back.</b> The share of body-time inside each token's catchment becomes its weight. The remainder is the reserve.</li>
+        <li><b>The book is marked.</b> On every market refresh the paper index applies the price moves to the weights the organism held.</li>
+      </ol>
+      <p>Steps one to three are the only part of the system that knows what a market is. Step four is the only part that decides anything, and it does not know what a market is.</p>
+    </section>
+
+    <section id="rules">
+      <h2>The seven rules</h2>
+      <p>The organism is a particle model in the style of Jones (2010), the standard way to grow Physarum-like networks on a computer, extended with an energy budget so growth and pruning emerge from feeding instead of being scripted. Every particle has a position, a heading and an energy level. Every step it does this, in order:</p>
+      <ol class="rules-doc">
+        <li><h4>Hunger</h4><p>Below <code>hungerThreshold</code> a particle is foraging: it can smell food and will settle on it. Above it, it is satiated: it ignores scent and follows only trail. This one switch is what makes the body circulate. Fed particles wander off and find new food. Hungry ones come home.</p></li>
+        <li><h4>Settle</h4><p>A hungry particle standing on food stays put this step with probability <code>stickiness * attract</code>.</p></li>
+        <li><h4>Sense</h4><p>Otherwise it reads the trail at three points <code>sensorOffset</code> cells ahead: straight on, and <code>sensorAngle</code> to each side. A hungry particle adds the scent at those points.</p></li>
+        <li><h4>Turn</h4><p>Front beats both sides: keep going. Both sides beat front: random turn. Otherwise turn toward the stronger side by <code>rotationAngle</code>, with a little <code>jitter</code>.</p></li>
+        <li><h4>Move</h4><p>One cell forward. The wall bounces it. A cell already holding <code>maxPerCell</code> particles blocks the move, and the particle turns away. Crowding is what makes the body spread instead of collapsing to a point.</p></li>
+        <li><h4>Leave a trail</h4><p>It deposits <code>depositAmount</code> where it lands. After every particle has moved, the whole trail map diffuses and decays.</p></li>
+        <li><h4>Feed, divide, die</h4><p>It pays <code>metabolism</code>. Inside a food node it gains <code>feedRate * attract</code>, shared with every other particle in that cell, and loses <code>toxinRate * toxicity</code>. At <code>divideEnergy</code> it splits into a free neighbouring cell. At zero it dies.</p></li>
+      </ol>
+      <pre class="code"><code><span class="c">// one particle, one step (simplified from src/sim/physarum.ts)</span>
+const hungry = energy &lt; hungerThreshold;
+if (hungry &amp;&amp; onFood &amp;&amp; random() &lt; stickiness * attract) stay();
+else {
+  let f = trail(front), l = trail(left), r = trail(right);
+  if (hungry) { f += scent(front); l += scent(left); r += scent(right); }
+  if      (f &gt; l &amp;&amp; f &gt; r) keepHeading();
+  else if (f &lt; l &amp;&amp; f &lt; r) turn(random() &lt; 0.5 ? -angle : angle);
+  else                      turn(l &lt; r ? angle : -angle);
+  if (!cellIsFull(ahead)) move();
+}
+depositTrail();
+energy += (feedRate * attract) / crowd - toxinRate * toxicity - metabolism;
+if (energy &gt;= divideEnergy &amp;&amp; freeNeighbour) divide();
+if (energy &lt;= 0) die();</code></pre>
+    </section>
+
+    <section id="fields">
+      <h2>Trail and scent</h2>
+      <p>The organism lives in two overlaid fields.</p>
+      <div class="two-cards">
+        <div><h4>Trail</h4><p>The body's own chemistry. Particles write it and read it. It blends toward its neighbours by <code>diffusion</code> and evaporates by <code>decay</code> every step. It is the organism's only memory, and it lasts a few dozen steps.</p></div>
+        <div><h4>Scent</h4><p>The food's chemistry. Every token with a positive score adds a Gaussian bump of height <code>scentPeak * attract</code>, reaching <code>attractReach</code> food radii. It is rebuilt on each market refresh and only hungry particles can smell it.</p></div>
+      </div>
+      <p>Keeping them apart matters. If food leaked into the same field as the body, a strong token would look like a large organism. Separate, the trail is purely where the body is.</p>
+    </section>
+
+    <section id="emerges">
+      <h2>What emerges</h2>
+      <p>None of the following is written anywhere in the code. It falls out of the rules.</p>
+      <dl class="defs-list">
+        <dt>Strong tokens get thick tubes</dt>
+        <dd>Particles on a strong node fill up fast, divide, and leave satiated, laying trail outward. Their children get hungry and come back. More cycles means more trail, and more trail pulls more traffic. In a fixed two-node test the full-strength node holds several times the body of a half-strength one.</dd>
+        <dt>Weak tokens get thin tubes</dt>
+        <dd>Food in a cell is shared. A weak node refills particles slowly, so fewer cycle through it.</dd>
+        <dt>Bad tokens get pruned</dt>
+        <dd>A negative score emits no scent and drains energy. Particles there die, the trail evaporates, and the branch is gone within seconds.</dd>
+        <dt>It diversifies without being told to</dt>
+        <dd>A node can only feed so much body. Extra particles go hungry, wander, and find something else.</dd>
+        <dt>It never holds a grudge</dt>
+        <dd>The only memory is trail. A token that was poison a minute ago and smells like food now gets a new branch.</dd>
+      </dl>
+    </section>
+
+    <section id="params">
+      <h2>Parameters</h2>
+      <p>Every number lives in <code>config/default.json</code> and is validated on load. These are the ones that change the organism's character.</p>
+      <table class="t">
+        <thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>sim.width</code>, <code>sim.height</code></td><td>256</td><td>Plate size in cells.</td></tr>
+          <tr><td><code>sim.sensorAngle</code></td><td>0.785</td><td>Radians between the front sensor and each side sensor.</td></tr>
+          <tr><td><code>sim.sensorOffset</code></td><td>9</td><td>How far ahead a particle senses, in cells.</td></tr>
+          <tr><td><code>sim.decay</code></td><td>0.08</td><td>Fraction of trail that evaporates per step. Lower makes old branches linger.</td></tr>
+          <tr><td><code>sim.diffusion</code></td><td>0.8</td><td>How much each cell blends toward its neighbours per step.</td></tr>
+          <tr><td><code>sim.metabolism</code></td><td>0.0025</td><td>Energy burned per step. Sets how far an explorer can travel before it starves.</td></tr>
+          <tr><td><code>sim.feedRate</code></td><td>0.05</td><td>Energy per step from a food cell at full score, shared per cell.</td></tr>
+          <tr><td><code>sim.toxinRate</code></td><td>0.03</td><td>Energy lost per step on a fully toxic node.</td></tr>
+          <tr><td><code>sim.hungerThreshold</code></td><td>0.8</td><td>Below this a particle smells food. Above it, it wanders.</td></tr>
+          <tr><td><code>sim.stickiness</code></td><td>0.5</td><td>How strongly hungry particles settle on food.</td></tr>
+          <tr><td><code>sim.maxPerCell</code></td><td>3</td><td>Crowding limit. Lower spreads the body, higher makes denser blobs.</td></tr>
+          <tr><td><code>sim.divideEnergy</code></td><td>2</td><td>Energy at which a particle splits in two.</td></tr>
+          <tr><td><code>sim.scentPeak</code></td><td>40</td><td>Scent at the centre of a full-score node.</td></tr>
+          <tr><td><code>sim.attractReach</code></td><td>7</td><td>How far scent carries, in food radii.</td></tr>
+          <tr><td><code>sim.catchmentReach</code></td><td>3</td><td>Radius, in food radii, inside which body counts toward a token.</td></tr>
+          <tr><td><code>sim.maxAgents</code> / <code>minAgents</code></td><td>20000 / 500</td><td>Population cap, and the floor below which the nucleus re-seeds.</td></tr>
+          <tr><td><code>engine.scoreSmoothing</code></td><td>0.2</td><td>How quickly scores track the market. Lower is calmer.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="scoring">
+      <h2>Food scoring</h2>
+      <p>The organism never sees a price. One stateless function turns each token snapshot into a number between -1 and 1, and that number is all it can taste.</p>
+      <table class="t">
+        <thead><tr><th>Component</th><th>Formula</th><th>Weight</th><th>The question</th></tr></thead>
+        <tbody>
+          <tr><td>Momentum</td><td><code>tanh(change1h / 4)</code></td><td>0.40</td><td>Is it moving now?</td></tr>
+          <tr><td>Trend</td><td><code>tanh(change24h / 20)</code></td><td>0.20</td><td>Has it been moving?</td></tr>
+          <tr><td>Activity</td><td><code>clamp(volume24h / liquidity / 2, 0, 1)</code></td><td>0.25</td><td>Is anyone trading it?</td></tr>
+          <tr><td>Depth</td><td><code>clamp((log10(liquidity) - 4) / 3, 0, 1)</code></td><td>0.15</td><td>Can you get out?</td></tr>
+          <tr><td>Fragility</td><td><code>(0.2 - depth) * 5</code> when depth &lt; 0.2</td><td>-0.50</td><td>Is it a rug?</td></tr>
+        </tbody>
+      </table>
+      <pre class="code"><code>score = clamp(0.40*momentum + 0.20*trend + 0.25*activity + 0.15*depth - 0.50*fragility, -1, 1)
+
+attract  = max(0,  score)   <span class="c">// how strongly it smells and feeds</span>
+toxicity = max(0, -score)   <span class="c">// how fast it drains</span></code></pre>
+      <p>Scores are smoothed across refreshes with an exponential moving average so that one noisy minute does not flip a branch between food and poison. This table is the entire strategy. Change it and you have a different organism.</p>
+    </section>
+
+    <section id="sources">
+      <h2>Market sources</h2>
+      <p>Anything that can return a list of token snapshots can feed the slime.</p>
+      <pre class="code"><code>interface TokenSnapshot {
+  address: string;          <span class="c">// stable id; the mint address on Solana</span>
+  symbol: string;
+  name: string;
+  priceUsd: number;
+  volume24hUsd: number;
+  liquidityUsd: number;
+  priceChange1hPct: number; <span class="c">// 4.2 means +4.2 percent</span>
+  priceChange24hPct: number;
+  updatedAt: number;
+}
+
+interface MarketSource {
+  readonly name: string;
+  readonly refreshMs: number;
+  fetch(): Promise&lt;TokenSnapshot[]&gt;;
+}</code></pre>
+      <table class="t">
+        <thead><tr><th>Source</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><code>mock</code></td><td>Ten synthetic Solana-flavoured tokens on regime-switching random walks: bull, bear, chop, pump, dump, dead. One fetch is one minute of market time. Deterministic from a seed. This is what the main site runs on.</td></tr>
+          <tr><td><code>dexscreener</code></td><td>Live Solana prices, volume, liquidity and price changes from the public DexScreener API. No key. Each token is collapsed to its deepest pool.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="positions">
+      <h2>Positions</h2>
+      <p>Each token node has a feeding radius and a catchment three times wider. Every step, every particle inside a catchment adds one visit to that token. Every ten steps the visits become shares of total body-time, smoothed. Those shares are the weights.</p>
+      <ul class="plain">
+        <li><b>Weight</b> is the share of body-time in a token's catchment.</li>
+        <li><b>Held</b> means the weight is at least one percent.</li>
+        <li><b>Reserve</b> is everything else: particles resting in the nucleus or wandering between tokens.</li>
+      </ul>
+      <p>Weights are ordered by score but not linear in it. Strong beats weak by a wide margin and poison gets nothing, but the exact ratio depends on geometry, crowding, and how long each token has been on the plate.</p>
+    </section>
+
+    <section id="index">
+      <h2>The index</h2>
+      <p>The organism index starts at 100. On every market refresh it applies each token's price move since the last refresh, weighted by what the organism held at that refresh:</p>
+      <pre class="code"><code>index *= 1 + sum(weight[token] * (price[token] / previousPrice[token] - 1))</code></pre>
+      <p>The reserve earns nothing. A benchmark runs alongside: the same tokens held in equal parts, never rebalanced by anything clever. If the index is above the benchmark, growing toward food did better than holding everything.</p>
+    </section>
+
+    <section id="paper">
+      <h2>Paper trading</h2>
+      <p>The book is paper. No real funds move, and the repository contains no wallet code, no signing and no exchange integration. The Solana slot shown on the site is a genuine live read of the chain, and that is the only thing the public site touches on-chain.</p>
+      <p>If on-chain execution is ever added, the treasury address and every transaction will be published so the book can be checked against the chain.</p>
+    </section>
+
+    <section id="narrator">
+      <h2>The narrator</h2>
+      <p>The positions section carries one line of prose that changes every forty-five seconds. A language model writes it from a small digest: the body count, the reserve, the top holdings with their scores, which tokens are toxic, and the last few events. It is told to explain behaviour through food, scent and starvation rather than intention, because the organism does not want anything.</p>
+      <p>Under it is the organism log, which involves no model at all. It compares the body now with the body a moment ago and reports the most important change: first contact, a branch thickening, a token turning bitter, a branch gone.</p>
+    </section>
+
+    <section id="backrooms">
+      <h2>The backrooms</h2>
+      <p>A terminal where five colonies of the same species talk to each other about what the organism is holding. One message arrives every twenty seconds. About one in five carries terminal art.</p>
+      <table class="t">
+        <thead><tr><th>Colony</th><th>Strain</th><th>Voice</th></tr></thead>
+        <tbody>
+          <tr><td><span class="who" style="--c:#2f6fd0">hokkaido</span></td><td>Cartographer</td><td>Precise. Measures everything. Descended from the plate that redrew the Tokyo rail map.</td></tr>
+          <tr><td><span class="who" style="--c:#b07a12">carolina</span></td><td>Lab supply</td><td>Cheerful, always hungry, raised on oats.</td></tr>
+          <tr><td><span class="who" style="--c:#4f8a1f">agar</span></td><td>Old plate</td><td>Slow, patient, quietly philosophical.</td></tr>
+          <tr><td><span class="who" style="--c:#c2553a">sclerotia</span></td><td>Dormant form</td><td>Terse and risk averse. Loves the reserve.</td></tr>
+          <tr><td><span class="who" style="--c:#8a4fc0">spore-9</span></td><td>Fresh spore</td><td>Excitable. Shouts. Draws.</td></tr>
+        </tbody>
+      </table>
+      <p>The conversation is dramatised: the colonies are voiced. What they talk about is real, because every batch is written from the live state of the organism, and they are told never to invent a token or a number.</p>
+    </section>
+
+    <!-- ============================================================ API -->
+    <section id="api">
+      <p class="eyebrow">API reference</p>
+      <h2>Overview</h2>
+      <p>The site exposes a small public API. Everything is JSON over HTTPS, there is no key, and CORS is open for the read endpoints.</p>
+      <table class="t">
+        <tbody>
+          <tr><td>Base URL</td><td><code>https://sorocarp.vercel.app</code></td></tr>
+          <tr><td>Format</td><td>JSON. <code>content-type: application/json</code> on POST bodies.</td></tr>
+          <tr><td>Auth</td><td>None.</td></tr>
+          <tr><td>Stability</td><td>Version 0.1. Shapes may change.</td></tr>
+        </tbody>
+      </table>
+      <div class="endpoints">
+        <a href="#api-chain"><i class="m get">GET</i><code>/api/chain</code><span>Current Solana slot, block height and epoch</span></a>
+        <a href="#api-scan"><i class="m get">GET</i><code>/api/scan</code><span>Solana tokens in the shape the organism scores</span></a>
+        <a href="#api-wallet"><i class="m get">GET</i><code>/api/wallet</code><span>Read-only SOL balance of an address</span></a>
+        <a href="#api-backrooms"><i class="m post">POST</i><code>/api/backrooms</code><span>The shared colony conversation</span></a>
+        <a href="#api-reflect"><i class="m post">POST</i><code>/api/reflect</code><span>One narrator note for a given state</span></a>
+      </div>
+    </section>
+
+    <section id="api-chain" class="ep">
+      <h3><i class="m get">GET</i> /api/chain</h3>
+      <p>A live read of Solana mainnet. Cached for two seconds. Falls back across public RPC endpoints, and returns the last good read with <code>stale: true</code> if all of them fail.</p>
+      <h5>Response</h5>
+      <table class="t">
+        <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>chain</code>, <code>cluster</code></td><td>string</td><td><code>solana</code>, <code>mainnet-beta</code></td></tr>
+          <tr><td><code>slot</code></td><td>number</td><td>Current confirmed slot.</td></tr>
+          <tr><td><code>blockHeight</code></td><td>number or null</td><td>Current block height.</td></tr>
+          <tr><td><code>epoch</code></td><td>number or null</td><td>Current epoch.</td></tr>
+          <tr><td><code>at</code></td><td>number</td><td>Unix milliseconds of the read.</td></tr>
+        </tbody>
+      </table>
+      <pre class="code"><code>curl https://sorocarp.vercel.app/api/chain</code></pre>
+      <div class="try" data-url="/api/chain"><button>Run it</button><pre>{
+  "chain": "solana",
+  "cluster": "mainnet-beta",
+  "slot": 453664156,
+  "blockHeight": 431702032,
+  "epoch": 1050,
+  "at": 1791226461626
+}</pre></div>
+    </section>
+
+    <section id="api-scan" class="ep">
+      <h3><i class="m get">GET</i> /api/scan</h3>
+      <p>Real Solana market data from DexScreener, collapsed to the deepest pool per token and returned as <code>TokenSnapshot</code> objects. With no query it returns the tokens currently most boosted on DexScreener. Cached for fifteen seconds.</p>
+      <h5>Query</h5>
+      <table class="t">
+        <thead><tr><th>Name</th><th>Type</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>q</code></td><td>string, optional</td><td>Search by name, symbol or mint address. Up to 64 characters.</td></tr>
+        </tbody>
+      </table>
+      <h5>Response</h5>
+      <table class="t">
+        <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>source</code></td><td>string</td><td><code>dexscreener</code></td></tr>
+          <tr><td><code>query</code></td><td>string or null</td><td>The search, if any.</td></tr>
+          <tr><td><code>tokens</code></td><td>TokenSnapshot[]</td><td>Up to 18 tokens. Adds <code>marketCapUsd</code> and <code>dex</code> to the shape above.</td></tr>
+        </tbody>
+      </table>
+      <pre class="code"><code>curl "https://sorocarp.vercel.app/api/scan?q=jup"</code></pre>
+      <div class="try" data-url="/api/scan?q=jup" data-trim="2"><button>Run it</button><pre>{
+  "source": "dexscreener",
+  "query": "jup",
+  "tokens": [
+    {
+      "address": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+      "symbol": "JUP",
+      "name": "Jupiter",
+      "priceUsd": 0.91,
+      "volume24hUsd": 9800000,
+      "liquidityUsd": 12400000,
+      "priceChange1hPct": 0.42,
+      "priceChange24hPct": -1.8
+    }
+  ]
+}</pre></div>
+      <p class="note">To score a token the way the organism does, apply the formula in <a href="#scoring">Food scoring</a> to each snapshot.</p>
+    </section>
+
+    <section id="api-wallet" class="ep">
+      <h3><i class="m get">GET</i> /api/wallet</h3>
+      <p>The SOL balance of any Solana address, read from the chain. Nothing is signed and no key is involved: this is the same public data an explorer shows. Cached for eight seconds per address.</p>
+      <h5>Query</h5>
+      <table class="t">
+        <thead><tr><th>Name</th><th>Type</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>address</code></td><td>string, required</td><td>A base58 Solana address, 32 to 44 characters.</td></tr>
+        </tbody>
+      </table>
+      <h5>Response</h5>
+      <table class="t">
+        <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>address</code></td><td>string</td><td>The address you asked about.</td></tr>
+          <tr><td><code>lamports</code></td><td>number</td><td>Balance in lamports.</td></tr>
+          <tr><td><code>sol</code></td><td>number</td><td>Balance in SOL.</td></tr>
+          <tr><td><code>slot</code></td><td>number or null</td><td>Slot the balance was read at.</td></tr>
+        </tbody>
+      </table>
+      <pre class="code"><code>curl "https://sorocarp.vercel.app/api/wallet?address=vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"</code></pre>
+      <div class="try" data-url="/api/wallet?address=vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"><button>Run it</button><pre>{
+  "address": "vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg",
+  "lamports": 1250000000,
+  "sol": 1.25,
+  "slot": 453675354,
+  "at": 1791229128211
+}</pre></div>
+    </section>
+
+    <section id="api-backrooms" class="ep">
+      <h3><i class="m post">POST</i> /api/backrooms</h3>
+      <p>The shared colony conversation. Messages are written in batches and released one every twenty seconds, so everyone polling sees the same room. Poll with the id of the last message you have.</p>
+      <h5>Query</h5>
+      <table class="t">
+        <thead><tr><th>Name</th><th>Type</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>since</code></td><td>number, optional</td><td>Return only messages with an id greater than this. Omit for the latest eight.</td></tr>
+        </tbody>
+      </table>
+      <h5>Body (optional)</h5>
+      <p>A digest of the organism the caller is watching. It is validated field by field and only used as colour for the next batch. Send <code>{}</code> to skip it.</p>
+      <table class="t">
+        <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>alive</code></td><td>number</td><td>Particles alive.</td></tr>
+          <tr><td><code>reserve</code></td><td>number, 0 to 1</td><td>Share of the body not on a token.</td></tr>
+          <tr><td><code>holdings</code></td><td>{ s, share }[]</td><td>Up to six. <code>s</code> is an uppercase symbol, <code>share</code> is 0 to 1.</td></tr>
+          <tr><td><code>toxic</code></td><td>string[]</td><td>Symbols that are currently poison.</td></tr>
+        </tbody>
+      </table>
+      <h5>Response</h5>
+      <table class="t">
+        <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>messages[].id</code></td><td>number</td><td>Increasing id. Use the largest as your next <code>since</code>.</td></tr>
+          <tr><td><code>messages[].who</code></td><td>string</td><td><code>hokkaido</code>, <code>carolina</code>, <code>agar</code>, <code>sclerotia</code> or <code>spore-9</code>.</td></tr>
+          <tr><td><code>messages[].text</code></td><td>string</td><td>The message. Up to 240 characters.</td></tr>
+          <tr><td><code>messages[].art</code></td><td>string or null</td><td>Terminal art: up to 8 lines of block and box-drawing characters.</td></tr>
+          <tr><td><code>messages[].at</code></td><td>number</td><td>Unix milliseconds.</td></tr>
+          <tr><td><code>total</code></td><td>number</td><td>Messages released since the room last woke up.</td></tr>
+        </tbody>
+      </table>
+      <pre class="code"><code>curl -X POST "https://sorocarp.vercel.app/api/backrooms?since=0" \
+  -H "content-type: application/json" \
+  -d '{"alive":4200,"reserve":0.31,"holdings":[{"s":"JTO","share":0.24}],"toxic":["BONK"]}'</code></pre>
+      <pre class="code out"><code>{
+  "messages": [
+    { "id": 1, "who": "hokkaido", "text": "morning census. 4200 particles alive, 31% resting in the reserve.", "art": null, "at": 1791230000000 },
+    { "id": 2, "who": "carolina", "text": "is that a lot of particles? feels like a lot.", "art": null, "at": 1791230020000 },
+    { "id": 3, "who": "spore-9", "text": "I DREW IT", "art": "JTO  ████████████░░░░  24%\nRSV  ███████████████▌  31%", "at": 1791230040000 }
+  ],
+  "total": 3
+}</code></pre>
+      <p class="note">The first call after a quiet spell can take about ten seconds while the opening batch is written. The room lives in memory, so it restarts when the site has had no visitors for a while.</p>
+    </section>
+
+    <section id="api-reflect" class="ep">
+      <h3><i class="m post">POST</i> /api/reflect</h3>
+      <p>One narrator note for a given state of the organism: one or two sentences, at most forty-five words. Identical states are answered from a short cache.</p>
+      <h5>Body</h5>
+      <table class="t">
+        <thead><tr><th>Field</th><th>Type</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>body</code></td><td>number, required</td><td>Particles alive.</td></tr>
+          <tr><td><code>reserve</code></td><td>number 0 to 1, required</td><td>Share of the body not on a token.</td></tr>
+          <tr><td><code>holdings</code></td><td>array, required</td><td>Up to six of <code>{ s, share, score, d1h }</code>: symbol, weight 0 to 1, food score -1 to 1, one hour change in percent.</td></tr>
+          <tr><td><code>toxic</code></td><td>string[]</td><td>Symbols that are currently poison.</td></tr>
+          <tr><td><code>events</code></td><td>string[]</td><td>Up to five recent events. Allowed: <code>contact:SYM</code>, <code>grow:SYM</code>, <code>shrink:SYM</code>, <code>pruned:SYM</code>, <code>toxic:SYM</code>, <code>recovered:SYM</code>, <code>top:SYM</code>, <code>scent:SYM</code>, <code>body:up</code>, <code>body:down</code>, <code>reserve:high</code>.</td></tr>
+        </tbody>
+      </table>
+      <pre class="code"><code>curl -X POST https://sorocarp.vercel.app/api/reflect \
+  -H "content-type: application/json" \
+  -d '{"body":4200,"reserve":0.31,
+       "holdings":[{"s":"JTO","share":0.24,"score":0.71,"d1h":3.1}],
+       "toxic":["BONK"],"events":["contact:JTO","toxic:BONK"]}'</code></pre>
+      <pre class="code out"><code>{
+  "text": "The organism thickens a tube onto JTO, its richest food at 0.71, which now holds 24% of the body. Branches near poisoned BONK retract, and 31% of the body rests in reserve."
+}</code></pre>
+    </section>
+
+    <section id="api-errors">
+      <h3>Errors and limits</h3>
+      <p>Errors are JSON with a single <code>error</code> string.</p>
+      <table class="t">
+        <thead><tr><th>Status</th><th>Meaning</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td><code>400</code></td><td>The body or query failed validation.</td><td>Check field names, ranges and symbol format (uppercase letters and digits, up to ten).</td></tr>
+          <tr><td><code>405</code></td><td>Wrong method.</td><td>See the method on the endpoint.</td></tr>
+          <tr><td><code>429</code></td><td>Too many requests.</td><td>Back off. The narrator allows one call per client every twenty seconds and four per minute overall.</td></tr>
+          <tr><td><code>502</code></td><td>An upstream (the chain, the market, or the model) did not answer.</td><td>Retry shortly.</td></tr>
+          <tr><td><code>503</code></td><td>The voice is offline.</td><td>The read endpoints still work. The site falls back to its built-in voices.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============================================================ engine -->
+    <section id="engine-rest">
+      <p class="eyebrow">Engine API</p>
+      <h2>REST</h2>
+      <p>When you run the engine yourself (<code>npm start</code>), it serves its own API on <code>http://127.0.0.1:4242</code>. This is the organism's full state, not the public site's.</p>
+      <table class="t">
+        <thead><tr><th>Path</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /health</code></td><td><code>{ ok, step }</code></td></tr>
+          <tr><td><code>GET /api/state</code></td><td>Everything: body stats, nucleus, tokens with scores and weights, reserve, portfolio.</td></tr>
+          <tr><td><code>GET /api/tokens</code></td><td>Tokens with score breakdown, attract, toxicity, share, occupancy and plate position.</td></tr>
+          <tr><td><code>GET /api/allocation</code></td><td><code>{ cash, tokens: { SYMBOL: weight } }</code></td></tr>
+          <tr><td><code>GET /api/portfolio</code></td><td>Value, benchmark, returns and up to 1200 history points.</td></tr>
+          <tr><td><code>GET /api/config</code></td><td>The organism and engine parameters in use.</td></tr>
+        </tbody>
+      </table>
+      <pre class="code"><code>curl http://127.0.0.1:4242/api/allocation</code></pre>
+      <pre class="code out"><code>{ "cash": 0.41, "tokens": { "JTO": 0.24, "WIF": 0.18, "SOL": 0.09, "BONK": 0 } }</code></pre>
+    </section>
+
+    <section id="engine-ws">
+      <h2>WebSocket</h2>
+      <p>The engine streams on the same port. On connect it sends a <code>hello</code>, then state twice a second and on every market refresh, and binary frames of the trail map twenty times a second.</p>
+      <pre class="code"><code><span class="c">// text frames, server to client</span>
+{ "type": "hello", "width": 256, "height": 256, "state": { ... } }
+{ "type": "state", "state": { ... } }
+
+<span class="c">// binary frames start with one tag byte</span>
+0x01  trail map, width * height bytes, row-major, 0 to 255
+0x02  particle positions, uint16 little-endian (x, y) pairs
+
+<span class="c">// text frames, client to server</span>
+{ "type": "pause" }
+{ "type": "resume" }
+{ "type": "reset" }
+{ "type": "speed", "value": 60 }
+{ "type": "agents", "on": true }</code></pre>
+      <pre class="code"><code>const ws = new WebSocket('ws://127.0.0.1:4242');
+ws.binaryType = 'arraybuffer';
+ws.onmessage = (ev) =&gt; {
+  if (typeof ev.data === 'string') return onState(JSON.parse(ev.data));
+  const bytes = new Uint8Array(ev.data);
+  if (bytes[0] === 0x01) paintTrail(bytes.subarray(1));
+};</code></pre>
+    </section>
+
+    <!-- ============================================================ run -->
+    <section id="install">
+      <p class="eyebrow">Run it yourself</p>
+      <h2>Install</h2>
+      <p>Node 20 or newer. The default market is synthetic, so it works offline.</p>
+      <pre class="code"><code>git clone https://github.com/sorocarp/sorocarp.git
+cd sorocarp
+npm install
+npm start
+<span class="c"># open http://127.0.0.1:4242</span></code></pre>
+    </section>
+
+    <section id="cli">
+      <h2>Command line</h2>
+      <table class="t">
+        <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>npm start</code></td><td>Runs the organism, the market loop and the server.</td></tr>
+          <tr><td><code>npm start -- --source dexscreener</code></td><td>The same, fed by live Solana data.</td></tr>
+          <tr><td><code>npm run headless -- -n 6000 --every 2000</code></td><td>No server. Prints score, share and occupancy per token as it runs.</td></tr>
+          <tr><td><code>npm run render -- 6000 frame.png</code></td><td>No browser. Renders the plate to a PNG.</td></tr>
+          <tr><td><code>npm run tokens -- --source dexscreener</code></td><td>One market snapshot, scored.</td></tr>
+          <tr><td><code>npm test</code></td><td>The test suite: determinism, growth toward food, pruning, scoring, markets, portfolio.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="config">
+      <h2>Configuration</h2>
+      <p>One file, <code>config/default.json</code>, validated on load. A few environment variables override it.</p>
+      <table class="t">
+        <thead><tr><th>Variable</th><th>Overrides</th></tr></thead>
+        <tbody>
+          <tr><td><code>PHYSARUM_MARKET_SOURCE</code></td><td><code>market.source</code>: <code>mock</code> or <code>dexscreener</code></td></tr>
+          <tr><td><code>PHYSARUM_SOLANA_TOKENS</code></td><td>Comma-separated mint addresses for the live source.</td></tr>
+          <tr><td><code>PHYSARUM_SEED</code></td><td>The seed for the organism and the synthetic market.</td></tr>
+          <tr><td><code>PORT</code>, <code>HOST</code></td><td>Where the server listens.</td></tr>
+          <tr><td><code>PHYSARUM_CONFIG</code></td><td>Path to a different config file.</td></tr>
+        </tbody>
+      </table>
+      <p>With the synthetic market, the same seed gives the same run step for step. That is what makes the tests meaningful and tuning reproducible.</p>
+    </section>
+
+    <section id="adapters">
+      <h2>Writing an adapter</h2>
+      <p>To feed the organism from somewhere new, implement <code>MarketSource</code> and register it.</p>
+      <pre class="code"><code><span class="c">// src/market/yoursource.ts</span>
+import type { MarketSource, TokenSnapshot } from './types.js';
+
+export class YourSource implements MarketSource {
+  readonly name = 'yours';
+  readonly refreshMs = 15_000;
+
+  async fetch(): Promise&lt;TokenSnapshot[]&gt; {
+    const rows = await getRowsFromYourApi();
+    return rows.map((r) =&gt; ({
+      address: r.mint,
+      symbol: r.symbol,
+      name: r.name,
+      priceUsd: r.price,
+      volume24hUsd: r.volume ?? 0,
+      liquidityUsd: r.liquidity ?? 0,
+      priceChange1hPct: r.change1h ?? 0,
+      priceChange24hPct: r.change24h ?? 0,
+      updatedAt: Date.now(),
+    }));
+  }
+}</code></pre>
+      <p>Then add a case to <code>createMarketSource()</code> in <code>src/market/index.ts</code> and extend the <code>source</code> enum in <code>src/config.ts</code>. Missing fields should be zero: the scorer treats unknown liquidity as thin and unknown momentum as flat.</p>
+    </section>
+
+    <section id="glossary">
+      <h2>Glossary</h2>
+      <dl class="defs-list">
+        <dt>Attract</dt><dd>The positive part of a food score. How strongly a token smells and feeds.</dd>
+        <dt>Catchment</dt><dd>The area around a token, three food radii wide, inside which body counts toward its weight.</dd>
+        <dt>Nucleus</dt><dd>The weak permanent food source in the middle of the plate. Where the organism starts and where it re-seeds.</dd>
+        <dt>Plasmodium</dt><dd>The feeding, moving stage of a slime mould: one cell, many nuclei, a network of tubes.</dd>
+        <dt>Reserve</dt><dd>Body not on any token. The equivalent of cash.</dd>
+        <dt>Sclerotium</dt><dd>The dormant form a slime mould takes when food runs out. It can wait for years.</dd>
+        <dt>Shuttle streaming</dt><dd>The rhythmic back-and-forth flow of protoplasm through a slime mould's tubes, about once every hundred seconds.</dd>
+        <dt>Slime Intelligence</dt><dd>Problem solving by growth and starvation, with no model, no training and no brain.</dd>
+        <dt>Sporulation</dt><dd>The stage where a slime mould commits its body to making spores that leave it.</dd>
+        <dt>Toxicity</dt><dd>The negative part of a food score. How fast a token drains the particles on it.</dd>
+      </dl>
+    </section>
+
+    <footer class="doc-foot">
+      <p>Sorocarp is an experiment with a paper portfolio. No real funds are traded. Nothing here is financial advice.</p>
+      <p><a href="/">sorocarp</a> <span>/</span> <a href="https://x.com/sorocarp" target="_blank" rel="noopener">@sorocarp</a> <span>/</span> <a href="https://sorolabs.si" target="_blank" rel="noopener">sorolabs.si</a> <span>/</span> <a href="https://github.com/sorocarp/sorocarp" target="_blank" rel="noopener">GitHub</a></p>
+    </footer>
+  </main>
+</div>
+
+<script src="/docs/docs.js" defer></script>
+</body>
+</html>
