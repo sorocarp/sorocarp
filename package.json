@@ -1,0 +1,41 @@
+{
+  "name": "sorocarp",
+  "version": "0.1.0",
+  "description": "Sorocarp: Slime Intelligence. A slime mould that grows toward token opportunities and prunes away from bad ones.",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "bin": {
+    "sorocarp": "dist/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/cli.ts run",
+    "start": "tsx src/cli.ts run",
+    "headless": "tsx src/cli.ts headless",
+    "tokens": "tsx src/cli.ts tokens",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "render": "tsx scripts/render-frame.ts",
+    "site:build": "esbuild site/src/main.ts --bundle --format=esm --minify --target=es2020 --outfile=site/organism.js",
+    "site:dev": "esbuild site/src/main.ts --bundle --format=esm --target=es2020 --outfile=site/organism.js --servedir=site --watch"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.5.13",
+    "esbuild": "^0.24.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
