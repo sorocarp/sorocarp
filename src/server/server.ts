@@ -66,7 +66,14 @@ export function createServer(cfg: Config, runner: Runner): http.Server {
       });
     }
     if (p === '/api/portfolio') return json(res, 200, runner.organism.state(runner.stepsPerSecond, 1200).portfolio);
-    if (p === '/api/config') return json(res, 200, { sim: cfg.sim, engine: cfg.engine, market: { source: cfg.market.source } });
+    if (p === '/api/voice') {
+      const o = runner.organism;
+      return json(res, 200, { narration: o.narration, notes: o.voice.notes.slice(0, 40) });
+    }
+    if (p === '/api/backrooms') return json(res, 200, { messages: runner.organism.backrooms.log.slice(-40) });
+    if (p === '/api/orders') return json(res, 200, { orders: runner.organism.orders.slice(-100), fills: runner.organism.ledger.fills.slice(-100) });
+    if (p === '/api/ledger') return json(res, 200, runner.state().ledger);
+    if (p === '/api/config') return json(res, 200, { sim: cfg.sim, engine: cfg.engine, execution: cfg.execution, voice: { ...cfg.voice, narratorActive: runner.narrator !== null }, backrooms: cfg.backrooms, market: { source: cfg.market.source } });
     if (p.startsWith('/api/')) return json(res, 404, { error: 'unknown endpoint' });
 
     serveStatic(req, res, p);
