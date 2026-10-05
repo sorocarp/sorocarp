@@ -39,13 +39,41 @@ const SimSchema = z.object({
 });
 
 const MarketSchema = z.object({
-  source: z.enum(['mock', 'dexscreener']),
+  source: z.enum(['mock', 'dexscreener', 'trending']),
   refreshMs: z.number().int().positive(),
   seed: z.number().int(),
   solana: z.object({
     refreshMs: z.number().int().positive(),
     tokens: z.array(z.string().min(32)),
   }),
+  trending: z.object({
+    refreshMs: z.number().int().positive(),
+    max: z.number().int().min(1).max(30),
+    stickMs: z.number().int().min(0),
+  }),
+});
+
+const ExecutionSchema = z.object({
+  /** Turn body weights into paper orders on every market refresh. */
+  enabled: z.boolean(),
+  minDelta: z.number().min(0).max(1),
+  cooldownMs: z.number().int().min(0),
+  maxOrdersPerCycle: z.number().int().min(1).max(50),
+  minCash: z.number().min(0).max(1),
+  slippageBps: z.number().min(0).max(1000),
+});
+
+const VoiceSchema = z.object({
+  /** How often the organism log looks for something to say. */
+  observeEveryMs: z.number().int().positive(),
+  /** Use a language model narrator when a key is in the environment. */
+  narrator: z.boolean(),
+  narratorEveryMs: z.number().int().positive(),
+  model: z.string().min(1),
+});
+
+const BackroomsSchema = z.object({
+  everyMs: z.number().int().positive(),
 });
 
 const EngineSchema = z.object({
@@ -70,6 +98,9 @@ export const ConfigSchema = z.object({
   market: MarketSchema,
   engine: EngineSchema,
   portfolio: PortfolioSchema,
+  execution: ExecutionSchema,
+  voice: VoiceSchema,
+  backrooms: BackroomsSchema,
   server: ServerSchema,
 });
 
@@ -90,7 +121,7 @@ export function loadConfig(file?: string): Config {
 export function applyEnv(cfg: Config, env: NodeJS.ProcessEnv = process.env): Config {
   const out: Config = structuredClone(cfg);
   const source = env.PHYSARUM_MARKET_SOURCE;
-  if (source === 'mock' || source === 'dexscreener') out.market.source = source;
+  if (source === 'mock' || source === 'dexscreener' || source === 'trending') out.market.source = source;
   if (env.PORT) {
     const port = Number(env.PORT);
     if (Number.isInteger(port) && port > 0) out.server.port = port;
