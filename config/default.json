@@ -46,6 +46,11 @@
         "jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL",
         "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE"
       ]
+    },
+    "trending": {
+      "refreshMs": 20000,
+      "max": 14,
+      "stickMs": 600000
     }
   },
   "engine": {
@@ -60,5 +65,22 @@
   "server": {
     "host": "127.0.0.1",
     "port": 4242
+  },
+  "execution": {
+    "enabled": true,
+    "minDelta": 0.02,
+    "cooldownMs": 60000,
+    "maxOrdersPerCycle": 4,
+    "minCash": 0.02,
+    "slippageBps": 10
+  },
+  "voice": {
+    "observeEveryMs": 900,
+    "narrator": true,
+    "narratorEveryMs": 45000,
+    "model": "claude-opus-5-5"
+  },
+  "backrooms": {
+    "everyMs": 20000
   }
 }
