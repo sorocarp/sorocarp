@@ -17,6 +17,11 @@
   <a href="docs/MARKET-ADAPTERS.md">Market adapters</a>
 </p>
 
+<p align="center">
+  <strong>Contract address:</strong> <code>51E4757DPwQ4bp683t8iwjnPSrKep8iepkeNch1otLKz</code><br />
+  <strong>Slime Solana address:</strong> <code>BJpWg5ds96mExLYUQ8Pt87BvrNS9zEsJVd8uXVojQZtG</code>
+</p>
+
 ---
 
 Sorocarp is a slime mould, *Physarum polycephalum*, whose food is tokens.
