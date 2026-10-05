@@ -200,6 +200,9 @@ function applyState(s) {
 
   renderAllocation(s.tokens);
   renderSpark(p.history, p.startingCapital);
+  renderExecution(s);
+  renderVoice(s);
+  renderChat(s.chat);
   $('btn-pause').textContent = s.paused ? 'Resume' : 'Pause';
   $('sel-speed').value = String(s.stepsPerSecond);
   caption.textContent = s.paused ? 'paused' : 'live';
@@ -221,6 +224,45 @@ function renderAllocation(tokens) {
     </tr>`;
   });
   body.innerHTML = rows.join('');
+}
+
+// ---------------------------------------------------------------- execution, voice, backrooms
+
+const COLONY_COLOURS = { hokkaido: '#8fb4ff', carolina: '#f4c95d', agar: '#86d6a4', sclerotia: '#f0927a', 'spore-9': '#d8a3f5' };
+const hhmmss = (t) => new Date(t).toTimeString().slice(0, 8);
+
+function renderExecution(s) {
+  const l = s.ledger;
+  $('x-nav').textContent = fmtUsd(l.navUsd);
+  const r = $('x-return');
+  r.textContent = fmtPct(l.returnPct);
+  r.className = 'hero-delta ' + (l.returnPct >= 0 ? 'up' : 'down');
+  $('x-cash').textContent = fmtUsd(l.cashUsd);
+  $('x-positions').textContent = String(l.positions.length);
+  $('x-fills').textContent = String(l.fills);
+  const orders = s.orders.slice().reverse();
+  if (orders.length) {
+    $('orders').innerHTML = orders
+      .map((o) => `<li><time>${hhmmss(o.at)}</time><span class="side ${o.side}">${o.side}</span><span>${escapeHtml(o.symbol)} ${fmtUsd(o.notionalUsd)} <span class="why">${o.reason}</span></span><span class="why">${(o.currentWeight * 100).toFixed(0)}% \u2192 ${(o.targetWeight * 100).toFixed(0)}%</span></li>`)
+      .join('');
+  }
+}
+
+function renderVoice(s) {
+  if (s.narration) {
+    $('narration').textContent = s.narration.text;
+    $('v-narrator').textContent = 'narrator ' + hhmmss(s.narration.at);
+  }
+  $('notes').innerHTML = s.notes.map((n) => `<li><time>${hhmmss(n.at)}</time><span>${escapeHtml(n.text)}</span></li>`).join('');
+}
+
+function renderChat(chat) {
+  const el = $('chat');
+  const stick = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  el.innerHTML = chat
+    .map((m) => `<li style="--c:${COLONY_COLOURS[m.who] || '#ccc'}"><b>${escapeHtml(m.who)}</b><div>${escapeHtml(m.text)}${m.art ? `<pre>${escapeHtml(m.art)}</pre>` : ''}</div></li>`)
+    .join('');
+  if (stick) el.scrollTop = el.scrollHeight;
 }
 
 // ---------------------------------------------------------------- sparkline
