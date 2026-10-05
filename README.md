@@ -48,6 +48,10 @@ hunger  ->  sense trail  ->  turn toward it  ->  move  ->  lay trail  ->  eat or
 - [The rules](#the-rules)
 - [From market data to food](#from-market-data-to-food)
 - [From body to portfolio](#from-body-to-portfolio)
+- [Paper execution](#paper-execution)
+- [Voice](#voice)
+- [Backrooms](#backrooms)
+- [Token discovery](#token-discovery)
 - [Architecture](#architecture)
 - [Project layout](#project-layout)
 - [Command line](#command-line)
@@ -265,6 +269,95 @@ across the same tokens is tracked alongside as a benchmark. Starting capital is
 
 Paper only. No orders are sent anywhere.
 
+## Paper execution
+
+The index above is a weight-return calculation. Version 0.2 adds a real book
+underneath it: cash, positions, orders and fills, so the organism's weights
+become something that could be executed.
+
+```
+shares  ->  Rebalancer.plan()  ->  Order[]  ->  Executor.execute()  ->  Fill[]  ->  Ledger
+```
+
+* **Rebalancer** ([src/execution/rebalancer.ts](src/execution/rebalancer.ts))
+  compares the body's weight on each token with the ledger's weight and only
+  acts on differences above `minDelta`. It never trades the same token twice
+  inside `cooldownMs`, sends at most `maxOrdersPerCycle` orders per market
+  refresh, largest moves first, and keeps `minCash` of NAV in cash. A token the
+  organism has abandoned is sold to zero and tagged `pruned`.
+* **Executor** is an interface: `execute(orders, prices, at) -> fills`. The
+  only implementation is `PaperExecutor`, which fills instantly at the last
+  price minus `slippageBps`. A real executor would sign and send; none exists
+  in this repository.
+* **Ledger** ([src/execution/ledger.ts](src/execution/ledger.ts)) holds cash
+  and positions with average entry, applies fills, and marks to market.
+
+Execution runs on every market refresh when `execution.enabled` is true. The
+headless run prints the ledger line, and the engine exposes `/api/orders` and
+`/api/ledger`.
+
+```
+ledger: nav $9654.54 (-3.45%)  cash $2563.21  positions 8  fills 11  orders last buy PYTH
+```
+
+## Voice
+
+The organism log ([src/engine/voice.ts](src/engine/voice.ts)) compares the
+body now with the body a moment ago and says the most important thing that
+changed, in the organism's own terms. No model is involved; it is a diff with
+a vocabulary.
+
+| Event | Example |
+|---|---|
+| `contact:JTO` | First contact with JTO. Feeding. |
+| `grow:JTO` | Thickening the tube to JTO. 24% of the body is there. |
+| `shrink:JTO` | Pulling mass back from JTO. Down to 9%. |
+| `pruned:JTO` | The branch to JTO is gone. |
+| `toxic:BONK` | BONK has turned bitter. Letting that branch starve. |
+| `recovered:BONK` | BONK smells like food again. |
+| `top:WIF` | WIF is now the largest part of me. |
+| `body:up`, `body:down` | Well fed. 4,100 particles and dividing. |
+
+Notes arrive at most every 2.6 seconds, never repeat back to back, and the
+most recent eight ride along in `/api/state`. `/api/voice` returns the last
+forty.
+
+An optional **narrator** ([src/engine/narrator.ts](src/engine/narrator.ts))
+turns the same digest into one or two sentences of prose every
+`voice.narratorEveryMs`. It is a language model that only talks: it is handed
+the body count, the holdings with their scores, the toxic tokens and the recent
+event codes, and it cannot touch a particle. It switches on when
+`ANTHROPIC_API_KEY` is in the environment and `voice.narrator` is true, and is
+simply absent otherwise.
+
+## Backrooms
+
+Five colonies of the same species talk about the organism
+([src/engine/backrooms.ts](src/engine/backrooms.ts)): hokkaido the cartographer,
+carolina the hungry lab strain, agar the old plate, sclerotia the dormant form,
+and spore-9. The generator is a grammar of conversation threads with slots
+filled from the live state, so they always talk about real tokens and real
+figures: the top holding, the reserve, the toxic ones, the last paper order.
+Nobody speaks twice in a row, threads are not repeated back to back, and about
+one message in five carries terminal art drawn with block and box characters.
+
+It is seeded from `market.seed`, so a run's chatter is as reproducible as its
+body. One message every `backrooms.everyMs`; the last twelve ride along in
+`/api/state` and `/api/backrooms` returns the last forty.
+
+## Token discovery
+
+The `trending` market source ([src/market/trending.ts](src/market/trending.ts))
+lets the plate find its own food. Each refresh it asks DexScreener which Solana
+tokens are currently most boosted, keeps up to `market.trending.max` of them,
+and fetches their pairs. A token that drops out of the list stays on the plate
+for `stickMs` so the organism abandons it on its own terms instead of having
+the food yanked away. `RingLayout` recycles slots as tokens come and go.
+
+```bash
+npm start -- --source trending
+```
+
 ## Architecture
 
 ```
@@ -340,11 +433,20 @@ More detail, including the clocks and the message flow, is in
 │   │   ├── scoring.ts        scoreToken, scoreToFood
 │   │   ├── mock.ts           regime-switching synthetic market
 │   │   ├── dexscreener.ts    live Solana data
+│   │   ├── trending.ts       token discovery from DexScreener boosts
 │   │   └── index.ts          createMarketSource
 │   ├── engine/
-│   │   ├── organism.ts       scores to food, visits to weights
-│   │   ├── portfolio.ts      paper portfolio and benchmark
-│   │   └── runner.ts         the clock and event emitter
+│   │   ├── organism.ts       scores to food, visits to weights, orders, voices
+│   │   ├── portfolio.ts      index and benchmark
+│   │   ├── voice.ts          the organism log
+│   │   ├── narrator.ts       optional prose narrator (only talks)
+│   │   ├── backrooms.ts      colony chatter generator and terminal art
+│   │   └── runner.ts         the clocks and event emitter
+│   ├── execution/
+│   │   ├── types.ts          Order, Fill, Executor
+│   │   ├── rebalancer.ts     weights to orders
+│   │   ├── ledger.ts         cash, positions, fills, mark to market
+│   │   └── paper.ts          PaperExecutor
 │   └── server/
 │       ├── protocol.ts       message types and binary encoders
 │       └── server.ts         static files, REST, WebSocket
@@ -438,11 +540,41 @@ with zod on load, so a typo fails fast with a readable error. Point
 | `server.host` | `127.0.0.1` |
 | `server.port` | 4242 |
 
+### `execution`
+
+| Key | Default | Meaning |
+|---|---|---|
+| `enabled` | true | plan and fill paper orders on every market refresh |
+| `minDelta` | 0.02 | ignore weight differences smaller than this |
+| `cooldownMs` | 60000 | do not trade the same token again within this |
+| `maxOrdersPerCycle` | 4 | at most this many orders per refresh, largest first |
+| `minCash` | 0.02 | keep this fraction of NAV in cash |
+| `slippageBps` | 10 | paper fills move this many basis points against you |
+
+### `voice` and `backrooms`
+
+| Key | Default | Meaning |
+|---|---|---|
+| `voice.observeEveryMs` | 900 | how often the organism log looks for something to say |
+| `voice.narrator` | true | use the narrator when a key is in the environment |
+| `voice.narratorEveryMs` | 45000 | how often the narrator writes |
+| `voice.model` | see config | the narrator's model id |
+| `backrooms.everyMs` | 20000 | one colony message per interval |
+
+### `market.trending`
+
+| Key | Default | Meaning |
+|---|---|---|
+| `refreshMs` | 20000 | how often the boosted list is polled |
+| `max` | 14 | how many tokens the plate holds at once |
+| `stickMs` | 600000 | how long a token that left the list stays on the plate |
+
 ### Environment overrides
 
 | Variable | Overrides |
 |---|---|
-| `PHYSARUM_MARKET_SOURCE` | `market.source` |
+| `PHYSARUM_MARKET_SOURCE` | `market.source`: `mock`, `dexscreener` or `trending` |
+| `ANTHROPIC_API_KEY` | turns the narrator on |
 | `PORT`, `HOST` | `server.port`, `server.host` |
 | `PHYSARUM_SOLANA_TOKENS` | `market.solana.tokens`, comma separated |
 | `PHYSARUM_SEED` | `market.seed` |
@@ -470,7 +602,11 @@ Everything is on one port.
 | `GET /api/tokens` | tokens with scores, shares, occupancy and dish positions |
 | `GET /api/allocation` | `{ cash, tokens: { SYMBOL: weight } }` |
 | `GET /api/portfolio` | paper portfolio with up to 1200 history points |
-| `GET /api/config` | organism and engine parameters in use |
+| `GET /api/orders` | the last hundred paper orders and fills |
+| `GET /api/ledger` | cash, NAV, positions with entry and PnL |
+| `GET /api/voice` | the narrator's latest line and the last forty notes |
+| `GET /api/backrooms` | the last forty colony messages |
+| `GET /api/config` | organism, engine, execution and voice parameters in use |
 
 The WebSocket is on the same port. On connect the server sends:
 
@@ -520,6 +656,10 @@ The live market moves far slower than the organism steps, so with real data the
 organism's shape changes over minutes, not seconds. Set `engine.stepsPerSecond`
 lower if you want the two clocks closer together.
 
+### `trending`
+
+Token discovery. See [Token discovery](#token-discovery).
+
 ### Writing your own
 
 Implement `MarketSource`, map your API to `TokenSnapshot[]`, add a case to
@@ -545,6 +685,11 @@ The suite covers:
 - **Portfolio.** Weighted returns against the benchmark, cash earning nothing,
   reset.
 - **Layout.** Stable positions, slot recycling, capacity.
+- **Execution.** The rebalancer's thresholds, cooldown, order cap and cash
+  floor; the ledger's marking and average entry; paper slippage.
+- **Voices.** The organism log's priorities and quiet periods; the backrooms
+  generator's determinism, turn-taking and slot filling; the narrator's digest.
+- **Discovery.** The trending source's roster, stickiness and failure handling.
 
 CI runs typecheck, tests, build and a short headless run on every push.
 
@@ -587,17 +732,16 @@ Some directions the structure already supports:
 ## Roadmap
 
 - Richer Solana adapters: Birdeye, Jupiter, pool-level liquidity as food.
-- Token discovery from trending pairs.
+- A signing executor behind the `Executor` interface, with a hard budget.
 - Record and replay of live runs.
-- A read-only rebalancer that reports what the organism would have done.
 - Obstacles and walls on the dish.
 
 ## FAQ
 
 **Is it actually trading?**
-No. The portfolio is paper. The repository contains no wallet code, no signing,
-and no exchange integration. `/api/allocation` exists so that something else
-could act on it, and that something is deliberately not here.
+No. The book is paper. The execution layer plans real orders and fills them on
+a ledger, but the only executor is the paper one. The repository contains no
+wallet code, no signing, and no exchange integration.
 
 **Is an LLM involved anywhere?**
 No. The organism is a particle model driven by the rules above, and nothing in
