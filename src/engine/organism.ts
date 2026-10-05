@@ -3,6 +3,8 @@
  *
  *   market.fetch()  ->  scoreToken()  ->  FoodNode.attract / toxicity
  *   sim.tick()      ->  visits per node ->  allocation shares  ->  portfolio
+ *   shares          ->  rebalancer     ->  paper orders        ->  ledger
+ *   state diffs     ->  voice (organism log), backrooms (colony chatter)
  *
  * This is the only file that knows about both prices and protoplasm.
  */
@@ -14,6 +16,10 @@ import type { FoodNode } from '../sim/food.js';
 import { RingLayout } from '../sim/layout.js';
 import { Physarum, type StepStats } from '../sim/physarum.js';
 import { Portfolio, type PortfolioPoint } from './portfolio.js';
+import { Ledger, PaperExecutor, Rebalancer, type Executor, type Fill, type LedgerView, type Order } from '../execution/index.js';
+import { OrganismVoice, type Note } from './voice.js';
+import { Backrooms, type ChatContext, type ChatMessage } from './backrooms.js';
+import type { Narration } from './narrator.js';
 
 export interface TokenView {
   address: string;
@@ -50,6 +56,16 @@ export interface OrganismState {
   nucleus: { x: number; y: number; radius: number; share: number };
   tokens: TokenView[];
   cashShare: number;
+  /** The organism log: the most recent notes, newest first. */
+  notes: Note[];
+  /** The narrator's latest line, if a narrator is running. */
+  narration: Narration | null;
+  /** The backrooms: the most recent colony messages, oldest first. */
+  chat: ChatMessage[];
+  /** Paper execution: recent orders (newest last) and the ledger. */
+  orders: Order[];
+  fills: Fill[];
+  ledger: LedgerView;
   portfolio: {
     startingCapital: number;
     value: number;
@@ -81,12 +97,26 @@ export class Organism {
   private marketUpdatedAt = 0;
   private marketRefreshes = 0;
 
+  readonly ledger: Ledger;
+  readonly rebalancer: Rebalancer;
+  executor: Executor;
+  readonly orders: Order[] = [];
+  readonly voice: OrganismVoice;
+  readonly backrooms: Backrooms;
+  narration: Narration | null = null;
+
   constructor(cfg: Config, market: MarketSource) {
     this.cfg = cfg;
     this.market = market;
     this.sim = new Physarum(cfg.sim, new Rng(cfg.market.seed));
     this.layout = new RingLayout(cfg.sim.width, cfg.sim.height);
     this.portfolio = new Portfolio(cfg.portfolio.startingCapitalUsd);
+    this.ledger = new Ledger(cfg.portfolio.startingCapitalUsd);
+    this.rebalancer = new Rebalancer(cfg.execution);
+    this.executor = new PaperExecutor(cfg.execution.slippageBps);
+    const talk = new Rng(cfg.market.seed + 7);
+    this.voice = new OrganismVoice(() => talk.next());
+    this.backrooms = new Backrooms(() => talk.next());
     this.sim.setFood([this.nucleusNode()]);
   }
 
@@ -94,6 +124,49 @@ export class Organism {
   async refreshMarket(now = Date.now()): Promise<void> {
     const snaps = await this.market.fetch();
     this.applySnapshots(snaps, now);
+    if (this.cfg.execution.enabled) await this.settle(now);
+  }
+
+  /** Turn the body's weights into paper orders and fill them on the ledger. */
+  async settle(now = Date.now()): Promise<Order[]> {
+    const prices = this.prices();
+    const targets = this.snapshots
+      .map((s) => ({ address: s.address, symbol: s.symbol, weight: this.shares.get(s.address) ?? 0 }))
+      .filter((t) => t.weight >= 0.01 || this.ledger.positions.has(t.address));
+    const orders = this.rebalancer.plan(targets, this.ledger, prices, now);
+    if (orders.length === 0) return orders;
+    const fills = await this.executor.execute(orders, prices, now);
+    for (const f of fills) this.ledger.apply(f);
+    this.orders.push(...orders);
+    if (this.orders.length > 200) this.orders.splice(0, this.orders.length - 200);
+    return orders;
+  }
+
+  private prices(): Map<string, number> {
+    return new Map(this.snapshots.map((s) => [s.address, s.priceUsd]));
+  }
+
+  /** Let the organism log look at the body. Returns the note if it said something. */
+  observe(now = Date.now()): Note | null {
+    return this.voice.observe(this.state(this.cfg.engine.stepsPerSecond, 0), now);
+  }
+
+  /** What the colonies and the narrator get to see. */
+  digest(): ChatContext {
+    const s = this.state(this.cfg.engine.stepsPerSecond, 0);
+    const last = this.orders[this.orders.length - 1];
+    return {
+      alive: s.alive,
+      reserve: Number(s.cashShare.toFixed(3)),
+      holdings: s.tokens.filter((t) => t.share >= 0.01).slice(0, 6).map((t) => ({ s: t.symbol, share: Number(t.share.toFixed(3)) })),
+      toxic: s.tokens.filter((t) => t.toxicity > 0).slice(0, 6).map((t) => t.symbol),
+      lastOrder: last ? { side: last.side, symbol: last.symbol } : null,
+    };
+  }
+
+  /** The next line of colony chatter. */
+  chatter(now = Date.now()): ChatMessage {
+    return this.backrooms.next(this.digest(), now);
   }
 
   /** Synchronous variant used by tests and by refreshMarket. */
@@ -163,6 +236,11 @@ export class Organism {
     this.sim.setFood([this.nucleusNode()]);
     this.snapshots = [];
     this.scores.clear();
+    this.ledger.reset();
+    this.rebalancer.reset();
+    this.orders.length = 0;
+    this.voice.reset();
+    this.narration = null;
   }
 
   /** Body-time share per node over the last window, smoothed. */
@@ -255,6 +333,12 @@ export class Organism {
       nucleus: { x: c.x, y: c.y, radius: this.cfg.sim.nucleusRadius, share: this.nucleusShare },
       tokens,
       cashShare: Math.max(0, 1 - tokenShare),
+      notes: this.voice.notes.slice(0, 8),
+      narration: this.narration,
+      chat: this.backrooms.log.slice(-12),
+      orders: this.orders.slice(-10),
+      fills: this.ledger.fills.slice(-10),
+      ledger: this.ledger.view(this.prices()),
       portfolio: {
         startingCapital: p.startingCapital,
         value: p.value,
