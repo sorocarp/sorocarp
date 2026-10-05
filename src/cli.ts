@@ -18,7 +18,7 @@ import { createServer } from './server/server.js';
 const log = logger('cli');
 const program = new Command();
 
-program.name('sorocarp').description('We gave a brainless organism access to the market.').version('0.1.0');
+program.name('sorocarp').description('We gave a brainless organism access to the market.').version('0.2.0');
 
 program
   .command('run')
@@ -65,9 +65,15 @@ program
 
     await organism.refreshMarket();
     const t0 = performance.now();
+    const stepsPerObserve = Math.max(1, Math.round((cfg.engine.stepsPerSecond * cfg.voice.observeEveryMs) / 1000));
+    const stepsPerChat = Math.max(1, Math.round((cfg.engine.stepsPerSecond * cfg.backrooms.everyMs) / 1000));
+    const clock0 = Date.now();
+    const simClock = (i: number) => clock0 + (i / cfg.engine.stepsPerSecond) * 1000;
     for (let i = 1; i <= steps; i++) {
       organism.tick();
-      if (i % stepsPerRefresh === 0) await organism.refreshMarket();
+      if (i % stepsPerRefresh === 0) await organism.refreshMarket(simClock(i));
+      if (i % stepsPerObserve === 0) organism.observe(simClock(i));
+      if (i % stepsPerChat === 0) organism.chatter(simClock(i));
       if (every > 0 && i % every === 0) printTable(organism, cfg.engine.stepsPerSecond, i);
     }
     const ms = performance.now() - t0;
@@ -119,6 +125,11 @@ function printTable(organism: Organism, stepsPerSecond: number, step: number): v
     })),
   );
   console.log(`cash share ${(s.cashShare * 100).toFixed(1)}%`);
+  const l = s.ledger;
+  console.log(`ledger: nav $${l.navUsd.toFixed(2)} (${l.returnPct >= 0 ? '+' : ''}${l.returnPct.toFixed(2)}%)  cash $${l.cashUsd.toFixed(2)}  positions ${l.positions.length}  fills ${l.fills}  orders ${s.orders.length ? 'last ' + s.orders[s.orders.length - 1].side + ' ' + s.orders[s.orders.length - 1].symbol : 'none yet'}`);
+  if (s.notes[0]) console.log(`voice: ${s.notes[0].text}`);
+  const chat = s.chat[s.chat.length - 1];
+  if (chat) console.log(`backrooms: ${chat.who}: ${chat.text}`);
 }
 
 function fmtUsd(v: number): string {
