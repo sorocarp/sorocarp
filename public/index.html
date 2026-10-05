@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Physarum</title>
-  <meta name="description" content="A simulated slime mould grows toward token opportunities and prunes away from bad ones. We gave a brainless organism access to the market." />
+  <meta name="description" content="A slime mould grows toward token opportunities and prunes away from bad ones. We gave a brainless organism access to the market." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -12,7 +12,7 @@
 </head>
 <body>
   <main class="app">
-    <section class="dish" aria-label="Live slime mould simulation">
+    <section class="dish" aria-label="Live slime mould">
       <div class="dish-frame">
         <canvas id="trail" width="256" height="256"></canvas>
         <canvas id="overlay" width="768" height="768"></canvas>
@@ -22,7 +22,7 @@
 
     <aside class="panel">
       <header class="panel-head">
-        <div class="eyebrow">Physarum polycephalum, simulated</div>
+        <div class="eyebrow">Physarum polycephalum</div>
         <h1>We gave a brainless organism access to the market.</h1>
         <p class="lede">
           Every token is a food source. The slime senses chemical gradients, grows toward
@@ -67,6 +67,36 @@
           </thead>
           <tbody id="alloc-body"></tbody>
         </table>
+      </section>
+
+      <section class="card" aria-label="Paper execution">
+        <div class="card-head">
+          <span class="card-title">Paper execution</span>
+          <span class="muted" id="x-source">paper</span>
+        </div>
+        <div class="hero">
+          <span class="hero-value" id="x-nav">$10,000.00</span>
+          <span class="hero-delta" id="x-return">+0.00%</span>
+        </div>
+        <div class="legend"><span>cash <b id="x-cash" class="muted">$10,000.00</b></span><span>positions <b id="x-positions" class="muted">0</b></span><span>fills <b id="x-fills" class="muted">0</b></span></div>
+        <ol class="orders" id="orders"><li class="muted">No orders yet. The book follows the body.</li></ol>
+      </section>
+
+      <section class="card" aria-label="Organism log">
+        <div class="card-head">
+          <span class="card-title">Voice</span>
+          <span class="muted" id="v-narrator">narrator off</span>
+        </div>
+        <p class="narration" id="narration">Watching the organism.</p>
+        <ol class="notes" id="notes"></ol>
+      </section>
+
+      <section class="card" aria-label="Backrooms">
+        <div class="card-head">
+          <span class="card-title">Backrooms</span>
+          <span class="muted">five colonies, one plate</span>
+        </div>
+        <ol class="chat" id="chat"></ol>
       </section>
 
       <section class="controls" aria-label="Controls">
