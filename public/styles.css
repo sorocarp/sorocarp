@@ -239,3 +239,21 @@ table.alloc { width: 100%; border-collapse: collapse; font-variant-numeric: tabu
   .stat:nth-child(2) { border-right: 0; }
   .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--line); }
 }
+
+/* ------------------------------------------------------------ execution, voice, backrooms */
+.orders { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.orders li { display: grid; grid-template-columns: 54px 44px 1fr auto; gap: 8px; align-items: baseline; }
+.orders time { color: var(--muted); font-size: 11px; }
+.orders .side { font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.06em; }
+.orders .buy { color: var(--up); }
+.orders .sell { color: var(--down); }
+.orders .why { color: var(--muted); font-size: 11px; }
+.narration { font-size: 15px; line-height: 1.45; color: var(--text); margin: 4px 0 10px; min-height: 2.9em; }
+.notes { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.notes li { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.notes li:last-child { border-bottom: 0; }
+.notes time { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.chat { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; font-size: 13px; }
+.chat li { display: grid; grid-template-columns: 76px 1fr; gap: 10px; }
+.chat b { color: var(--c); font-weight: 600; }
+.chat pre { margin: 6px 0 0; padding: 8px 10px; border-left: 2px solid var(--c); background: var(--bg); color: var(--c); font: 11.5px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; overflow-x: auto; }
