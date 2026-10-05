@@ -1,6 +1,6 @@
 {
   "name": "sorocarp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Sorocarp: Slime Intelligence. A slime mould that grows toward token opportunities and prunes away from bad ones.",
   "type": "module",
   "license": "MIT",
@@ -25,6 +25,7 @@
     "site:dev": "esbuild site/src/main.ts --bundle --format=esm --target=es2020 --outfile=site/organism.js --servedir=site --watch"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
     "ws": "^8.18.0",
