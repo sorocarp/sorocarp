@@ -9,6 +9,7 @@ import type { Config } from '../config.js';
 import { logger } from '../core/log.js';
 import type { OrganismState } from './organism.js';
 import { Organism } from './organism.js';
+import { Narrator } from './narrator.js';
 
 const log = logger('runner');
 
@@ -29,6 +30,10 @@ export class Runner extends EventEmitter {
   private frameTimer: NodeJS.Timeout | null = null;
   private stateTimer: NodeJS.Timeout | null = null;
   private marketTimer: NodeJS.Timeout | null = null;
+  private voiceTimer: NodeJS.Timeout | null = null;
+  private chatTimer: NodeJS.Timeout | null = null;
+  private narratorTimer: NodeJS.Timeout | null = null;
+  narrator: Narrator | null = null;
   private refreshing = false;
   private frameBuf: Uint8Array;
   private tickBudgetMs: number;
@@ -48,12 +53,25 @@ export class Runner extends EventEmitter {
     this.frameTimer = setInterval(() => this.emitFrame(), 1000 / this.cfg.engine.frameRate);
     this.stateTimer = setInterval(() => this.emitState(), 500);
     this.marketTimer = setInterval(() => void this.refreshMarket(), this.organism.market.refreshMs);
+    this.voiceTimer = setInterval(() => {
+      if (!this.paused && this.organism.observe()) this.emitState();
+    }, this.cfg.voice.observeEveryMs);
+    this.chatTimer = setInterval(() => {
+      if (this.paused) return;
+      this.organism.chatter();
+      this.emitState();
+    }, this.cfg.backrooms.everyMs);
+    if (this.cfg.voice.narrator && Narrator.available()) {
+      this.narrator = new Narrator({ model: this.cfg.voice.model, minIntervalMs: this.cfg.voice.narratorEveryMs });
+      this.narratorTimer = setInterval(() => void this.narrate(), this.cfg.voice.narratorEveryMs);
+      log.info('narrator on', { model: this.cfg.voice.model });
+    }
     log.info('started', { stepsPerSecond: this.stepsPerSecond, market: this.organism.market.name });
   }
 
   stop(): void {
-    for (const t of [this.stepTimer, this.frameTimer, this.stateTimer, this.marketTimer]) if (t) clearInterval(t);
-    this.stepTimer = this.frameTimer = this.stateTimer = this.marketTimer = null;
+    for (const t of [this.stepTimer, this.frameTimer, this.stateTimer, this.marketTimer, this.voiceTimer, this.chatTimer, this.narratorTimer]) if (t) clearInterval(t);
+    this.stepTimer = this.frameTimer = this.stateTimer = this.marketTimer = this.voiceTimer = this.chatTimer = this.narratorTimer = null;
   }
 
   setSpeed(stepsPerSecond: number): void {
@@ -92,6 +110,19 @@ export class Runner extends EventEmitter {
       if (this.paused) return;
       for (let i = 0; i < ticksPerFire; i++) this.organism.tick();
     }, intervalMs);
+  }
+
+  private async narrate(): Promise<void> {
+    if (!this.narrator || this.paused) return;
+    try {
+      const n = await this.narrator.reflect(this.organism.state(this.stepsPerSecond, 0), this.organism.voice.recentCodes());
+      if (n) {
+        this.organism.narration = n;
+        this.emitState();
+      }
+    } catch (err) {
+      log.warn('narrator failed', { error: (err as Error).message });
+    }
   }
 
   private async refreshMarket(): Promise<void> {
